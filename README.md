@@ -1,4 +1,4 @@
-# lottery
+# Lottery
 
 1~45 중 6개 번호를 뽑는 단일 HTML 로또 추첨기입니다.
 
