@@ -3,55 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>로또 추첨기</title>
+  <title>lottery · 추첨기</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
     :root {
-      --bg: oklch(0.975 0.008 250);
-      --bg-deep: oklch(0.94 0.012 250);
-      --ink: oklch(0.2 0.02 255);
-      --ink-muted: oklch(0.48 0.02 255);
-      --surface: oklch(0.995 0.004 250);
-      --line: oklch(0.88 0.012 250);
-      --accent: oklch(0.78 0.155 85);
-      --accent-ink: oklch(0.25 0.05 85);
-      --accent-deep: oklch(0.62 0.14 78);
-      --ball-1: oklch(0.82 0.14 95);
-      --ball-2: oklch(0.72 0.12 240);
-      --ball-3: oklch(0.68 0.16 25);
-      --ball-4: oklch(0.72 0.02 95);
-      --ball-5: oklch(0.72 0.12 145);
-      --radius-ctl: 10px;
-      --radius-ball: 9999px;
+      --bg: oklch(0.97 0.01 230);
+      --bg-band: oklch(0.93 0.02 230);
+      --ink: oklch(0.22 0.035 250);
+      --ink-muted: oklch(0.5 0.025 250);
+      --surface: oklch(0.99 0.005 230);
+      --line: oklch(0.86 0.02 230);
+      --accent: oklch(0.58 0.19 25);
+      --accent-ink: oklch(0.98 0.01 25);
+      --accent-hover: oklch(0.5 0.18 22);
+      --ball-1: oklch(0.84 0.12 95);
+      --ball-2: oklch(0.72 0.11 245);
+      --ball-3: oklch(0.66 0.17 25);
+      --ball-4: oklch(0.78 0.015 250);
+      --ball-5: oklch(0.72 0.11 155);
+      --radius-ctl: 8px;
+      --radius-chip: 6px;
       --space: 8px;
       --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
       --ease-move: cubic-bezier(0.77, 0, 0.175, 1);
       --shadow:
-        0 1px 1px oklch(0.45 0.03 95 / 0.06),
-        0 2px 4px oklch(0.45 0.03 95 / 0.06),
-        0 8px 20px oklch(0.45 0.03 95 / 0.08);
-      /* Soft serif Latin brand + Pretendard Korean body */
-      --font-display: "Fraunces", Georgia, serif;
+        0 1px 1px oklch(0.35 0.03 250 / 0.05),
+        0 3px 6px oklch(0.35 0.03 250 / 0.06),
+        0 10px 24px oklch(0.35 0.03 250 / 0.07);
+      --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
       --font-body: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
-      --font-num: "Pretendard Variable", Pretendard, sans-serif;
+      --control-h: 48px;
     }
 
-    [hidden] {
-      display: none !important;
-    }
+    [hidden] { display: none !important; }
 
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
 
-    html {
-      height: 100%;
-    }
+    html { height: 100%; }
 
     body {
       margin: 0;
@@ -59,84 +50,143 @@
       font-family: var(--font-body);
       font-weight: 400;
       font-size: 16px;
-      line-height: 1.6;
-      letter-spacing: -0.01em;
+      line-height: 1.65;
       color: var(--ink);
-      background:
-        radial-gradient(ellipse 80% 50% at 10% -10%, oklch(0.92 0.05 85 / 0.45), transparent 55%),
-        radial-gradient(ellipse 60% 40% at 90% 10%, oklch(0.93 0.035 230 / 0.4), transparent 50%),
-        radial-gradient(ellipse 50% 35% at 50% 100%, oklch(0.92 0.04 145 / 0.28), transparent 55%),
-        var(--bg);
+      background-color: var(--bg);
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent calc(var(--space) * 4 - 1px),
+          oklch(0.9 0.015 230 / 0.55) calc(var(--space) * 4 - 1px),
+          oklch(0.9 0.015 230 / 0.55) calc(var(--space) * 4)
+        );
+      background-size: calc(var(--space) * 4) 100%;
       word-break: keep-all;
       overflow-wrap: anywhere;
       -webkit-font-smoothing: antialiased;
     }
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.35;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
-      mix-blend-mode: multiply;
-      z-index: 0;
+    .shell {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
+      max-width: 1120px;
+      margin: 0 auto;
     }
 
-    .page {
-      position: relative;
-      z-index: 1;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: calc(var(--space) * 5) calc(var(--space) * 3) calc(var(--space) * 8);
-      min-height: 100dvh;
+    .rail {
+      padding: calc(var(--space) * 6) calc(var(--space) * 4);
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: calc(var(--space) * 4);
+      justify-content: space-between;
+      gap: calc(var(--space) * 5);
+      border-right: 1px solid var(--line);
+      background: var(--surface);
     }
 
     .brand {
       display: flex;
       flex-direction: column;
-      gap: calc(var(--space) * 1.5);
+      gap: calc(var(--space) * 2);
+    }
+
+    .brand__rule {
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 1px;
     }
 
     .brand__mark {
-      font-family: var(--font-display);
-      font-optical-sizing: auto;
-      font-weight: 700;
-      font-size: clamp(3.75rem, 14vw, 6rem);
-      line-height: 1;
-      letter-spacing: -0.03em;
-      font-variation-settings: "SOFT" 50, "WONK" 0;
-      color: var(--ink);
       margin: 0;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3.5rem, 8vw, 5.5rem);
+      line-height: 0.92;
+      letter-spacing: -0.03em;
+      text-transform: lowercase;
+      color: var(--ink);
       text-wrap: balance;
     }
 
     .brand__lede {
       margin: 0;
-      max-width: 28rem;
-      font-size: 1.0625rem;
-      line-height: 1.65;
-      letter-spacing: -0.01em;
-      color: var(--ink-muted);
+      max-width: 22rem;
+      font-size: 1.05rem;
       font-weight: 450;
+      line-height: 1.65;
+      color: var(--ink-muted);
       text-wrap: pretty;
     }
 
+    .spec {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: calc(var(--space) * 1) calc(var(--space) * 2);
+      margin: 0;
+      padding: 0;
+      font-size: 0.875rem;
+    }
+
+    .spec dt {
+      margin: 0;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+
+    .spec dd {
+      margin: 0;
+      font-weight: 650;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+
     .stage {
+      padding: calc(var(--space) * 5) calc(var(--space) * 4);
       display: flex;
       flex-direction: column;
-      gap: calc(var(--space) * 3);
+      gap: calc(var(--space) * 4);
+      justify-content: center;
+      background:
+        linear-gradient(180deg, var(--bg-band) 0%, var(--bg) 42%);
+    }
+
+    .trough {
+      position: relative;
+      padding: calc(var(--space) * 4) 0 calc(var(--space) * 3);
+      border-top: 2px dashed var(--line);
+      border-bottom: 2px dashed var(--line);
+      min-height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: calc(var(--space) * 2);
+    }
+
+    .trough__label {
+      position: absolute;
+      top: calc(var(--space) * -1.5);
+      left: 0;
+      padding: 0 calc(var(--space) * 1);
+      background: var(--bg-band);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: -0.01em;
+    }
+
+    .empty {
+      margin: 0;
+      color: var(--ink-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
 
     .results {
       display: flex;
       flex-direction: column;
       gap: calc(var(--space) * 2.5);
-      min-height: 88px;
     }
 
     .set-row {
@@ -148,7 +198,6 @@
     .set-label {
       font-size: 0.8125rem;
       font-weight: 500;
-      letter-spacing: -0.01em;
       color: var(--ink-muted);
     }
 
@@ -160,77 +209,45 @@
     }
 
     .ball {
-      width: 72px;
-      height: 72px;
-      border-radius: var(--radius-ball);
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
-      font-family: var(--font-num);
+      font-family: var(--font-display);
       font-weight: 800;
-      font-size: 1.625rem;
-      letter-spacing: -0.04em;
-      color: var(--ink);
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
-      box-shadow:
-        inset 0 -6px 12px oklch(0.2 0.02 95 / 0.12),
-        inset 0 4px 8px oklch(1 0 0 / 0.45),
-        var(--shadow);
-      position: relative;
-      transform: translateY(8px) scale(0.96);
+      color: var(--ink);
+      border: 2px solid oklch(0.3 0.04 250 / 0.12);
+      box-shadow: var(--shadow);
       opacity: 0;
-    }
-
-    .ball::after {
-      content: "";
-      position: absolute;
-      top: 14%;
-      left: 18%;
-      width: 28%;
-      height: 18%;
-      border-radius: 50%;
-      background: oklch(1 0 0 / 0.45);
-      filter: blur(1px);
+      transform: translateY(6px) scale(0.96);
     }
 
     .ball.is-in {
       opacity: 1;
       transform: translateY(0) scale(1);
       transition:
-        opacity 280ms var(--ease-out),
-        transform 420ms var(--ease-out);
+        opacity 200ms var(--ease-out),
+        transform 260ms var(--ease-out);
+    }
+
+    .ball.is-spinning {
+      animation: tick 0.28s var(--ease-move) infinite alternate;
+    }
+
+    @keyframes tick {
+      from { transform: translateY(-1px); }
+      to { transform: translateY(2px); }
     }
 
     .ball--r1 { background: var(--ball-1); }
-    .ball--r2 { background: var(--ball-2); color: oklch(0.98 0.01 240); }
-    .ball--r3 { background: var(--ball-3); color: oklch(0.98 0.01 25); }
+    .ball--r2 { background: var(--ball-2); color: oklch(0.98 0.01 245); border-color: oklch(0.45 0.08 245 / 0.25); }
+    .ball--r3 { background: var(--ball-3); color: oklch(0.98 0.01 25); border-color: oklch(0.45 0.1 25 / 0.25); }
     .ball--r4 { background: var(--ball-4); }
-    .ball--r5 { background: var(--ball-5); color: oklch(0.98 0.01 145); }
-
-    .ball.is-spinning {
-      animation: wobble 0.45s var(--ease-move) infinite alternate;
-    }
-
-    @keyframes wobble {
-      from { transform: translateY(-2px) rotate(-4deg); }
-      to { transform: translateY(2px) rotate(4deg); }
-    }
-
-    .empty {
-      margin: 0;
-      padding: calc(var(--space) * 3) 0;
-      color: var(--ink-muted);
-      font-size: 0.9375rem;
-      font-weight: 400;
-      line-height: 1.65;
-      letter-spacing: -0.01em;
-      border-top: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .empty[hidden],
-    .results[hidden] {
-      display: none;
-    }
+    .ball--r5 { background: var(--ball-5); color: oklch(0.98 0.01 155); border-color: oklch(0.45 0.08 155 / 0.25); }
 
     .controls {
       display: flex;
@@ -248,7 +265,6 @@
     .field label {
       font-size: 0.8125rem;
       font-weight: 500;
-      letter-spacing: -0.01em;
       color: var(--ink-muted);
     }
 
@@ -260,7 +276,7 @@
     .select-shell::after {
       content: "";
       position: absolute;
-      right: 16px;
+      right: 14px;
       top: 50%;
       width: 7px;
       height: 7px;
@@ -271,33 +287,32 @@
     }
 
     .field select {
-      height: 48px;
-      min-width: 96px;
+      height: var(--control-h);
+      min-width: 88px;
       padding: 0 40px 0 calc(var(--space) * 2);
       border: 1px solid var(--line);
       border-radius: var(--radius-ctl);
       background-color: var(--surface);
       color: var(--ink);
-      font-family: var(--font-num);
+      font-family: var(--font-body);
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 650;
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
       appearance: none;
       -webkit-appearance: none;
-      -moz-appearance: none;
       box-shadow: var(--shadow);
       cursor: pointer;
     }
 
     .field select:focus-visible,
     .btn:focus-visible {
-      outline: 2px solid var(--accent-deep);
+      outline: 2px solid var(--accent);
       outline-offset: 3px;
     }
 
     .btn {
-      height: 48px;
+      height: var(--control-h);
       padding: 0 calc(var(--space) * 3.5);
       border: none;
       border-radius: 9999px;
@@ -309,52 +324,36 @@
       letter-spacing: -0.02em;
       cursor: pointer;
       box-shadow: var(--shadow);
-      transition:
-        background-color 140ms var(--ease-out),
-        color 140ms var(--ease-out),
-        box-shadow 140ms var(--ease-out);
+      transition: background-color 140ms var(--ease-out);
     }
 
-    .btn:hover {
-      background: var(--accent-deep);
-      color: oklch(0.98 0.02 75);
-    }
-
-    .btn:disabled {
-      cursor: wait;
-      opacity: 0.7;
-    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { cursor: wait; opacity: 0.72; }
 
     .meta {
       display: flex;
       flex-wrap: wrap;
-      gap: calc(var(--space) * 2);
-      align-items: baseline;
+      gap: calc(var(--space) * 1) calc(var(--space) * 2);
+      margin: 0;
       font-size: 0.875rem;
-      font-weight: 400;
-      letter-spacing: -0.01em;
       color: var(--ink-muted);
     }
 
     .meta strong {
       color: var(--ink);
-      font-family: var(--font-num);
-      font-variant-numeric: tabular-nums;
       font-weight: 650;
+      font-variant-numeric: tabular-nums;
       letter-spacing: -0.02em;
     }
 
     .history {
-      margin-top: calc(var(--space) * 2);
-      padding-top: calc(var(--space) * 3);
-      border-top: 1px solid var(--line);
+      margin-top: auto;
     }
 
     .history h2 {
-      margin: 0 0 calc(var(--space) * 2);
+      margin: 0 0 calc(var(--space) * 1.5);
       font-size: 0.8125rem;
       font-weight: 500;
-      letter-spacing: -0.01em;
       color: var(--ink-muted);
     }
 
@@ -362,36 +361,29 @@
       list-style: none;
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
+      border-top: 1px solid var(--line);
     }
 
     .history-list li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 4.5rem 1fr;
       gap: calc(var(--space) * 1.5);
+      align-items: center;
       padding: calc(var(--space) * 1.5) 0;
-      border-bottom: 1px solid oklch(0.9 0.015 95);
+      border-bottom: 1px solid oklch(0.9 0.015 230);
       font-variant-numeric: tabular-nums;
     }
 
-    .history-list li:last-child {
-      border-bottom: none;
-    }
-
     .history-list .when {
-      font-size: 0.8rem;
+      font-size: 0.8125rem;
       color: var(--ink-muted);
-      min-width: 4.5rem;
+      font-weight: 500;
     }
 
     .history-list .nums {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      font-weight: 600;
-      font-size: 0.95rem;
     }
 
     .chip {
@@ -400,13 +392,12 @@
       min-width: 28px;
       height: 28px;
       padding: 0 6px;
-      border-radius: 8px;
-      background: var(--bg-deep);
-      font-family: var(--font-num);
-      font-size: 0.8125rem;
-      font-weight: 650;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
+      border-radius: var(--radius-chip);
+      background: var(--bg-band);
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
     }
 
     .sr-only {
@@ -421,10 +412,29 @@
       border: 0;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 800px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: calc(var(--space) * 4) calc(var(--space) * 3);
+        gap: calc(var(--space) * 3);
+      }
+
+      .brand__mark {
+        font-size: clamp(3.25rem, 16vw, 4.5rem);
+      }
+
+      .stage {
+        padding: calc(var(--space) * 4) calc(var(--space) * 3) calc(var(--space) * 6);
+      }
+
       .ball {
-        width: 56px;
-        height: 56px;
+        width: 52px;
+        height: 52px;
         font-size: 1.25rem;
       }
 
@@ -434,10 +444,7 @@
       }
 
       .select-shell,
-      .field select {
-        width: 100%;
-      }
-
+      .field select,
       .btn {
         width: 100%;
       }
@@ -445,29 +452,39 @@
 
     @media (prefers-reduced-motion: reduce) {
       .ball.is-in {
-        transition: opacity 160ms linear;
+        transition: opacity 140ms linear;
         transform: none;
       }
-
-      .ball.is-spinning {
-        animation: none;
-      }
+      .ball.is-spinning { animation: none; }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header class="brand">
-      <h1 class="brand__mark">lottery</h1>
-      <p class="brand__lede">1부터 45까지, 여섯 개. 버튼을 누르면 바로 뽑습니다.</p>
-    </header>
+  <div class="shell">
+    <aside class="rail">
+      <header class="brand">
+        <div class="brand__rule" aria-hidden="true"></div>
+        <h1 class="brand__mark">lottery</h1>
+        <p class="brand__lede">1부터 45까지, 여섯 개. 버튼을 누르면 바로 뽑습니다.</p>
+      </header>
 
-    <section class="stage" aria-labelledby="result-label">
-      <h2 id="result-label" class="sr-only">추첨 결과</h2>
+      <dl class="spec">
+        <dt>범위</dt>
+        <dd>1 ~ 45</dd>
+        <dt>개수</dt>
+        <dd>6</dd>
+        <dt>방식</dt>
+        <dd>무작위</dd>
+      </dl>
+    </aside>
 
-      <p class="empty" id="empty">아직 번호가 없습니다. 아래에서 세트를 고른 뒤 추첨하세요.</p>
+    <main class="stage">
+      <section class="trough" aria-labelledby="result-label">
+        <span class="trough__label" id="result-label">추첨 결과</span>
 
-      <div class="results" id="results" hidden aria-live="polite"></div>
+        <p class="empty" id="empty">아직 번호가 없습니다. 아래에서 세트를 고른 뒤 추첨하세요.</p>
+        <div class="results" id="results" hidden aria-live="polite"></div>
+      </section>
 
       <div class="controls">
         <div class="field">
@@ -488,19 +505,19 @@
         이번 회차 <strong id="drawn-at"></strong>
         · 조합 <strong id="combo-count">0</strong>개
       </p>
-    </section>
 
-    <section class="history" id="history-wrap" hidden>
-      <h2>이번 세션</h2>
-      <ol class="history-list" id="history"></ol>
-    </section>
-  </main>
+      <section class="history" id="history-wrap" hidden>
+        <h2>이번 세션</h2>
+        <ol class="history-list" id="history"></ol>
+      </section>
+    </main>
+  </div>
 
   <script>
     const POOL = 45;
     const PICK = 6;
-    const STAGGER_MS = 70;
-    const SPIN_MS = 520;
+    const STAGGER_MS = 55;
+    const SPIN_MS = 380;
 
     const els = {
       empty: document.getElementById("empty"),
@@ -552,9 +569,7 @@
       el.className = `ball ball--r${ballRange(n)}${spinning ? " is-spinning" : ""}`;
       el.textContent = n;
       el.style.transitionDelay = spinning || reduceMotion ? "0ms" : `${delay}ms`;
-      if (spinning) {
-        el.classList.add("is-in");
-      }
+      if (spinning) el.classList.add("is-in");
       return el;
     }
 
@@ -600,9 +615,7 @@
 
     function pushHistory(sets) {
       const now = new Date();
-      sets.forEach((nums) => {
-        history.unshift({ at: now, nums });
-      });
+      sets.forEach((nums) => history.unshift({ at: now, nums }));
       if (history.length > 12) history.length = 12;
 
       els.historyWrap.hidden = false;
@@ -626,8 +639,10 @@
       const sets = Array.from({ length: count }, () => pickNumbers());
 
       if (!reduceMotion) {
-        const decoys = [Array.from({ length: PICK }, () => 1 + Math.floor(Math.random() * POOL))];
-        renderSets(decoys, { spinning: true });
+        renderSets(
+          [Array.from({ length: PICK }, () => 1 + Math.floor(Math.random() * POOL))],
+          { spinning: true }
+        );
         await sleep(SPIN_MS);
       }
 
@@ -637,7 +652,6 @@
       els.meta.hidden = false;
       els.drawnAt.textContent = formatTime(now);
       els.comboCount.textContent = String(count);
-
       pushHistory(sets);
 
       drawing = false;
@@ -646,9 +660,6 @@
     }
 
     els.draw.addEventListener("click", runDraw);
-    els.sets.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") runDraw();
-    });
   </script>
 </body>
 </html>
