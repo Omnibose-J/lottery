@@ -29,6 +29,9 @@
       --space: 8px;
       --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
       --ease-move: cubic-bezier(0.77, 0, 0.175, 1);
+      --ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
+      --dur-enter: 420ms;
+      --dur-fast: 180ms;
       --shadow:
         0 1px 1px oklch(0.35 0.03 250 / 0.05),
         0 3px 6px oklch(0.35 0.03 250 / 0.06),
@@ -83,6 +86,7 @@
       gap: calc(var(--space) * 5);
       border-right: 1px solid var(--line);
       background: var(--surface);
+      animation: enter-rail var(--dur-enter) var(--ease-out) both;
     }
 
     .brand {
@@ -96,6 +100,8 @@
       height: 3px;
       background: var(--accent);
       border-radius: 1px;
+      transform-origin: left center;
+      animation: rule-draw 480ms var(--ease-out) 80ms both;
     }
 
     .brand__mark {
@@ -108,6 +114,7 @@
       text-transform: lowercase;
       color: var(--ink);
       text-wrap: balance;
+      animation: enter-up var(--dur-enter) var(--ease-out) 120ms both;
     }
 
     .brand__lede {
@@ -118,6 +125,7 @@
       line-height: 1.65;
       color: var(--ink-muted);
       text-wrap: pretty;
+      animation: enter-up var(--dur-enter) var(--ease-out) 180ms both;
     }
 
     .spec {
@@ -127,6 +135,7 @@
       margin: 0;
       padding: 0;
       font-size: 0.875rem;
+      animation: enter-up var(--dur-enter) var(--ease-out) 240ms both;
     }
 
     .spec dt {
@@ -150,6 +159,7 @@
       justify-content: center;
       background:
         linear-gradient(180deg, var(--bg-band) 0%, var(--bg) 42%);
+      animation: enter-stage var(--dur-enter) var(--ease-out) 100ms both;
     }
 
     .trough {
@@ -162,6 +172,19 @@
       flex-direction: column;
       justify-content: center;
       gap: calc(var(--space) * 2);
+      transition: border-color 200ms var(--ease-out), background-color 200ms var(--ease-out);
+    }
+
+    .trough.is-drawing {
+      border-color: oklch(0.7 0.08 25 / 0.55);
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        oklch(0.58 0.19 25 / 0.06) 50%,
+        transparent 100%
+      );
+      background-size: 200% 100%;
+      animation: trough-shimmer 0.9s linear infinite;
     }
 
     .trough__label {
@@ -223,24 +246,98 @@
       border: 2px solid oklch(0.3 0.04 250 / 0.12);
       box-shadow: var(--shadow);
       opacity: 0;
-      transform: translateY(6px) scale(0.96);
+      transform: translateY(10px) scale(0.92);
+      will-change: transform, opacity;
     }
 
     .ball.is-in {
       opacity: 1;
       transform: translateY(0) scale(1);
-      transition:
-        opacity 200ms var(--ease-out),
-        transform 260ms var(--ease-out);
+      animation: pop-in 380ms var(--ease-out) both;
     }
 
     .ball.is-spinning {
-      animation: tick 0.28s var(--ease-move) infinite alternate;
+      opacity: 1;
+      animation: tick 0.22s var(--ease-move) infinite alternate;
     }
 
     @keyframes tick {
-      from { transform: translateY(-1px); }
-      to { transform: translateY(2px); }
+      from { transform: translateY(-2px) rotate(-3deg); }
+      to { transform: translateY(3px) rotate(3deg); }
+    }
+
+    @keyframes pop-in {
+      0% {
+        opacity: 0;
+        transform: translateY(12px) scale(0.9);
+      }
+      70% {
+        opacity: 1;
+        transform: translateY(-3px) scale(1.04);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes enter-up {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes enter-rail {
+      from {
+        opacity: 0;
+        transform: translateX(-16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes enter-stage {
+      from {
+        opacity: 0;
+        transform: translateX(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes rule-draw {
+      from { transform: scaleX(0); opacity: 0; }
+      to { transform: scaleX(1); opacity: 1; }
+    }
+
+    @keyframes trough-shimmer {
+      from { background-position: 100% 0; }
+      to { background-position: -100% 0; }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes row-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .ball--r1 { background: var(--ball-1); }
@@ -254,6 +351,7 @@
       flex-wrap: wrap;
       align-items: end;
       gap: calc(var(--space) * 2);
+      animation: enter-up var(--dur-enter) var(--ease-out) 220ms both;
     }
 
     .field {
@@ -337,6 +435,7 @@
       margin: 0;
       font-size: 0.875rem;
       color: var(--ink-muted);
+      animation: fade-in var(--dur-fast) var(--ease-out) both;
     }
 
     .meta strong {
@@ -348,6 +447,7 @@
 
     .history {
       margin-top: auto;
+      animation: enter-up 320ms var(--ease-out) both;
     }
 
     .history h2 {
@@ -372,7 +472,13 @@
       padding: calc(var(--space) * 1.5) 0;
       border-bottom: 1px solid oklch(0.9 0.015 230);
       font-variant-numeric: tabular-nums;
+      animation: row-in 280ms var(--ease-out) both;
     }
+
+    .history-list li:nth-child(1) { animation-delay: 0ms; }
+    .history-list li:nth-child(2) { animation-delay: 40ms; }
+    .history-list li:nth-child(3) { animation-delay: 80ms; }
+    .history-list li:nth-child(4) { animation-delay: 120ms; }
 
     .history-list .when {
       font-size: 0.8125rem;
@@ -451,11 +557,29 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
+      .rail,
+      .brand__rule,
+      .brand__mark,
+      .brand__lede,
+      .spec,
+      .stage,
+      .controls,
+      .meta,
+      .history,
+      .history-list li,
       .ball.is-in {
-        transition: opacity 140ms linear;
+        animation: fade-in 160ms linear both;
         transform: none;
       }
-      .ball.is-spinning { animation: none; }
+
+      .ball.is-spinning,
+      .trough.is-drawing {
+        animation: none;
+      }
+
+      .trough.is-drawing {
+        background: oklch(0.58 0.19 25 / 0.05);
+      }
     }
   </style>
 </head>
@@ -507,17 +631,28 @@
       </p>
 
       <section class="history" id="history-wrap" hidden>
-        <h2>이번 세션</h2>
+        <h2>최근 추첨</h2>
         <ol class="history-list" id="history"></ol>
+        <p class="meta" id="db-status" hidden></p>
       </section>
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const POOL = 45;
     const PICK = 6;
-    const STAGGER_MS = 55;
-    const SPIN_MS = 380;
+    const STAGGER_MS = 65;
+    const SPIN_MS = 520;
+    const HISTORY_LIMIT = 12;
+
+    // Public anon key + RLS (select/insert on lotto_draw only)
+    const SUPABASE_URL = "https://uuqpsswvpebtawpcgvaa.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cXBzc3d2cGVidGF3cGNndmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjE5MzMsImV4cCI6MjA5NzU5NzkzM30.sXpeYxjA55mvq4z0jK-Id4HUOY-rz3rR7TP6_XO3I7c";
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const els = {
       empty: document.getElementById("empty"),
@@ -529,9 +664,10 @@
       comboCount: document.getElementById("combo-count"),
       historyWrap: document.getElementById("history-wrap"),
       history: document.getElementById("history"),
+      trough: document.querySelector(".trough"),
+      dbStatus: document.getElementById("db-status"),
     };
 
-    const history = [];
     let drawing = false;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -564,11 +700,24 @@
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
+    function setDbStatus(message, isError = false) {
+      if (!message) {
+        els.dbStatus.hidden = true;
+        els.dbStatus.textContent = "";
+        return;
+      }
+      els.dbStatus.hidden = false;
+      els.dbStatus.textContent = message;
+      els.dbStatus.style.color = isError ? "var(--accent)" : "var(--ink-muted)";
+    }
+
     function makeBall(n, { spinning = false, delay = 0 } = {}) {
       const el = document.createElement("span");
       el.className = `ball ball--r${ballRange(n)}${spinning ? " is-spinning" : ""}`;
       el.textContent = n;
-      el.style.transitionDelay = spinning || reduceMotion ? "0ms" : `${delay}ms`;
+      if (!spinning && !reduceMotion) {
+        el.style.animationDelay = `${delay}ms`;
+      }
       if (spinning) el.classList.add("is-in");
       return el;
     }
@@ -613,27 +762,62 @@
       }
     }
 
-    function pushHistory(sets) {
-      const now = new Date();
-      sets.forEach((nums) => history.unshift({ at: now, nums }));
-      if (history.length > 12) history.length = 12;
+    function renderHistory(rows) {
+      if (!rows.length) {
+        els.historyWrap.hidden = true;
+        return;
+      }
 
       els.historyWrap.hidden = false;
-      els.history.innerHTML = history
-        .map(
-          (row) => `
+      els.historyWrap.style.animation = "none";
+      void els.historyWrap.offsetWidth;
+      els.historyWrap.style.animation = "";
+
+      els.history.innerHTML = rows
+        .map((row) => {
+          const at = new Date(row.created_at);
+          const nums = row.numbers;
+          return `
           <li>
-            <span class="when">${formatTime(row.at)}</span>
-            <span class="nums">${row.nums.map((n) => `<span class="chip">${n}</span>`).join("")}</span>
-          </li>`
-        )
+            <span class="when">${formatTime(at)}</span>
+            <span class="nums">${nums.map((n) => `<span class="chip">${n}</span>`).join("")}</span>
+          </li>`;
+        })
         .join("");
+    }
+
+    async function loadHistory() {
+      const { data, error } = await db
+        .from("lotto_draw")
+        .select("id, numbers, created_at")
+        .order("created_at", { ascending: false })
+        .limit(HISTORY_LIMIT);
+
+      if (error) {
+        setDbStatus("기록 불러오기 실패: " + error.message, true);
+        return;
+      }
+
+      setDbStatus("");
+      renderHistory(data || []);
+    }
+
+    async function saveDraws(sets) {
+      const payload = sets.map((numbers) => ({ numbers }));
+      const { error } = await db.from("lotto_draw").insert(payload);
+      if (error) {
+        setDbStatus("저장 실패: " + error.message, true);
+        return false;
+      }
+      setDbStatus("");
+      return true;
     }
 
     async function runDraw() {
       if (drawing) return;
       drawing = true;
       els.draw.disabled = true;
+      els.trough.classList.add("is-drawing");
 
       const count = Number(els.sets.value) || 1;
       const sets = Array.from({ length: count }, () => pickNumbers());
@@ -650,16 +834,23 @@
 
       const now = new Date();
       els.meta.hidden = false;
+      els.meta.style.animation = "none";
+      void els.meta.offsetWidth;
+      els.meta.style.animation = "";
       els.drawnAt.textContent = formatTime(now);
       els.comboCount.textContent = String(count);
-      pushHistory(sets);
 
+      await saveDraws(sets);
+      await loadHistory();
+
+      els.trough.classList.remove("is-drawing");
       drawing = false;
       els.draw.disabled = false;
       els.draw.focus();
     }
 
     els.draw.addEventListener("click", runDraw);
+    loadHistory();
   </script>
 </body>
 </html>
