@@ -43,7 +43,10 @@
       line-height: 1.47059;
       letter-spacing: -0.022em;
       color: var(--ink);
-      background: var(--bg);
+      background:
+        radial-gradient(900px 420px at 50% -80px, rgba(90, 160, 255, 0.12), transparent 60%),
+        radial-gradient(700px 360px at 85% 18%, rgba(255, 180, 120, 0.1), transparent 55%),
+        var(--bg);
       word-break: keep-all;
       overflow-wrap: anywhere;
       -webkit-font-smoothing: antialiased;
@@ -95,9 +98,41 @@
     }
 
     .hero {
+      position: relative;
+      overflow: hidden;
       text-align: center;
       padding: 64px 24px 40px;
-      background: var(--surface);
+      background: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(2px);
+    }
+
+    .hero::before {
+      width: 220px;
+      height: 220px;
+      top: -60px;
+      left: calc(50% - 280px);
+      background: radial-gradient(circle, rgba(91, 155, 213, 0.22), transparent 70%);
+    }
+
+    .hero::after {
+      width: 180px;
+      height: 180px;
+      top: 20px;
+      right: calc(50% - 260px);
+      background: radial-gradient(circle, rgba(232, 93, 76, 0.16), transparent 70%);
+    }
+
+    .hero__inner {
+      position: relative;
+      z-index: 1;
     }
 
     .hero__eyebrow {
@@ -134,14 +169,37 @@
     }
 
     .stage {
+      position: relative;
+      overflow: hidden;
       margin-top: -8px;
       padding: 48px 40px 40px;
       border-radius: 28px;
-      background: var(--surface);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      background:
+        radial-gradient(480px 180px at 50% 18%, rgba(245, 215, 110, 0.14), transparent 70%),
+        linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.8) inset,
+        0 8px 30px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .stage__glow {
+      position: absolute;
+      inset: auto 10% 42% 10%;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(0, 102, 204, 0.08), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .stage > *:not(.stage__glow) {
+      position: relative;
+      z-index: 1;
     }
 
     .trough {
+      position: relative;
       min-height: 112px;
       display: flex;
       flex-direction: column;
@@ -149,6 +207,21 @@
       align-items: center;
       gap: 16px;
       margin-bottom: 32px;
+    }
+
+    .trough__ring {
+      position: absolute;
+      width: min(420px, 90%);
+      height: 96px;
+      border-radius: 999px;
+      border: 1px dashed rgba(0, 0, 0, 0.08);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .trough > :not(.trough__ring) {
+      position: relative;
+      z-index: 1;
     }
 
     .trough.is-drawing {
@@ -353,10 +426,17 @@
     }
 
     .history {
+      position: relative;
+      overflow: hidden;
       margin-top: 20px;
       padding: 28px 32px;
       border-radius: 28px;
-      background: var(--surface);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
+        radial-gradient(400px 160px at 100% 0%, rgba(107, 203, 119, 0.1), transparent 60%),
+        var(--surface);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
     }
 
     .history-head {
@@ -544,16 +624,20 @@
   </nav>
 
   <header class="hero">
-    <p class="hero__eyebrow">6 / 45</p>
-    <h1 class="hero__title">Lottery</h1>
-    <p class="hero__copy">버튼을 누르면 여섯 개 번호가 뽑히고, 추첨 기록이 저장됩니다.</p>
+    <div class="hero__inner">
+      <p class="hero__eyebrow">6 / 45</p>
+      <h1 class="hero__title">Lottery</h1>
+      <p class="hero__copy">버튼을 누르면 여섯 개 번호가 뽑히고, 추첨 기록이 저장됩니다.</p>
+    </div>
   </header>
 
   <div class="panel">
     <section class="stage" aria-labelledby="result-label">
+      <div class="stage__glow" aria-hidden="true"></div>
       <h2 class="sr-only" id="result-label">추첨 결과</h2>
 
       <div class="trough" id="trough">
+        <div class="trough__ring" aria-hidden="true"></div>
         <p class="empty" id="empty">아직 번호가 없습니다. 세트를 고른 뒤 추첨하세요.</p>
         <div class="results" id="results" hidden aria-live="polite"></div>
       </div>
