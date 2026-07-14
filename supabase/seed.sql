@@ -1,0 +1,1 @@
+-- Optional seed data for local db reset. Intentionally empty for this practice app.

@@ -74,6 +74,14 @@
       font-size: 19px;
       font-weight: 600;
       letter-spacing: -0.02em;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
     .nav__link {
@@ -93,7 +101,8 @@
     .btn:focus-visible,
     .btn-ghost:focus-visible,
     .btn-icon:focus-visible,
-    .field select:focus-visible {
+    .field select:focus-visible,
+    .field input:focus-visible {
       outline: 2px solid var(--apple);
       outline-offset: 3px;
       border-radius: 4px;
@@ -139,10 +148,10 @@
 
     .hero__title {
       margin: 0 0 12px;
-      font-size: clamp(40px, 8vw, 56px);
+      font-size: clamp(36px, 7vw, 48px);
       font-weight: 600;
-      line-height: 1.07143;
-      letter-spacing: -0.005em;
+      line-height: 1.1;
+      letter-spacing: -0.015em;
       text-wrap: balance;
     }
 
@@ -335,6 +344,11 @@
     .ball--r4 { background: var(--ball-4); }
     .ball--r5 { background: var(--ball-5); color: #fff; }
 
+    .ball--hit {
+      outline: 2px solid var(--apple);
+      outline-offset: 2px;
+    }
+
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -371,7 +385,8 @@
       pointer-events: none;
     }
 
-    .field select {
+    .field select,
+    .field input[type="text"] {
       height: var(--control-h);
       min-width: 88px;
       padding: 0 36px 0 14px;
@@ -385,7 +400,13 @@
       font-variant-numeric: tabular-nums;
       appearance: none;
       -webkit-appearance: none;
-      cursor: pointer;
+    }
+
+    .field select { cursor: pointer; padding-right: 36px; }
+    .field input[type="text"] {
+      min-width: 220px;
+      padding-right: 14px;
+      cursor: text;
     }
 
     .btn {
@@ -419,24 +440,62 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .compare {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .compare__title {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      text-align: center;
+    }
+
+    .compare__hint {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--ink-faint);
+      text-align: center;
+    }
+
+    .compare__row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: end;
+      gap: 10px;
+    }
+
+    .compare__out {
+      margin: 12px 0 0;
+      text-align: center;
+      font-size: 14px;
+      color: var(--ink-soft);
+      min-height: 1.4em;
+    }
+
     .history {
-      position: relative;
-      overflow: hidden;
-      margin-top: 20px;
-      padding: 28px 32px;
-      border-radius: 28px;
-      background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
-        radial-gradient(400px 160px at 100% 0%, rgba(52, 199, 89, 0.12), transparent 60%),
-        var(--surface);
-      border: 1px solid rgba(0, 0, 0, 0.04);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
     }
 
     .history-head {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
+      flex-wrap: wrap;
       gap: 12px;
       margin-bottom: 8px;
     }
@@ -446,6 +505,44 @@
       font-size: 21px;
       font-weight: 600;
       letter-spacing: -0.01em;
+    }
+
+    .history-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .seg {
+      display: inline-flex;
+      border: 1px solid var(--line);
+      border-radius: 980px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .seg button {
+      border: none;
+      background: transparent;
+      height: 32px;
+      padding: 0 12px;
+      font: inherit;
+      font-size: 12px;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+
+    .seg button[aria-pressed="true"] {
+      background: var(--apple-soft);
+      color: var(--apple);
+      font-weight: 600;
+    }
+
+    .history-stats {
+      margin: 0 0 12px;
+      font-size: 13px;
+      color: var(--ink-faint);
+      line-height: 1.5;
     }
 
     .history-scroll {
@@ -485,17 +582,26 @@
     }
 
     .chip {
+      position: relative;
       display: inline-grid;
       place-items: center;
-      min-width: 28px;
+      width: 28px;
       height: 28px;
-      padding: 0 6px;
-      border-radius: 980px;
-      background: var(--bg);
-      font-size: 13px;
+      border-radius: 50%;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: -0.01em;
+      box-shadow:
+        inset 0 -3px 6px rgba(0, 0, 0, 0.1),
+        inset 0 2px 4px rgba(255, 255, 255, 0.35);
+      overflow: hidden;
     }
+
+    .chip.ball--r1 { background: var(--ball-1); color: var(--ink); }
+    .chip.ball--r2 { background: var(--ball-2); color: #fff; }
+    .chip.ball--r3 { background: var(--ball-3); color: #fff; }
+    .chip.ball--r4 { background: var(--ball-4); color: var(--ink); }
+    .chip.ball--r5 { background: var(--ball-5); color: #fff; }
 
     .history-dialog {
       width: min(520px, calc(100vw - 2rem));
@@ -566,6 +672,7 @@
     }
 
     .btn-ghost:hover { background: var(--bg); }
+    .btn-ghost:disabled { opacity: 0.55; cursor: wait; }
 
     .btn-icon {
       width: 28px;
@@ -581,6 +688,18 @@
 
     .btn-icon:hover { color: var(--ink); }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     @keyframes float-in {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -593,14 +712,13 @@
 
     @media (max-width: 734px) {
       .hero { padding: 48px 20px 32px; }
-      .hero__title { font-size: 36px; }
+      .hero__title { font-size: 32px; }
       .hero__copy { font-size: 17px; }
       .stage { padding: 32px 20px 28px; border-radius: 20px; }
       .ball { width: 52px; height: 52px; font-size: 17px; }
-      .controls { flex-direction: column; align-items: stretch; }
+      .controls, .compare__row { flex-direction: column; align-items: stretch; }
       .field { width: 100%; }
-      .select-shell, .field select, .btn { width: 100%; }
-      .history { padding: 22px 20px; border-radius: 20px; }
+      .select-shell, .field select, .field input[type="text"], .btn { width: 100%; }
       .history-scroll { max-height: 180px; }
     }
 
@@ -616,24 +734,26 @@
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <p class="nav__mark">Lottery</p>
-    <button type="button" class="nav__link" id="open-all-history">전체기록 보기</button>
+  <nav class="nav" aria-label="주요">
+    <a class="nav__mark" href="#">Lottery</a>
+    <div class="nav__actions">
+      <button type="button" class="nav__link" id="open-all-history">전체기록 보기</button>
+    </div>
   </nav>
 
   <header class="hero">
     <div class="hero__inner">
-      <h1 class="hero__title">Lottery</h1>
-      <p class="hero__copy">버튼을 누르면 여섯 개 번호가 뽑히고, 추첨 기록이 저장됩니다.</p>
+      <h1 class="hero__title">여섯 개 번호를 뽑으세요</h1>
+      <p class="hero__copy">세트를 고른 뒤 추첨하면 번호가 저장되고, 최근 기록을 바로 확인할 수 있습니다.</p>
     </div>
   </header>
 
-  <div class="panel">
+  <main class="panel">
     <section class="stage" aria-labelledby="result-label">
       <div class="stage__glow" aria-hidden="true"></div>
       <h2 class="sr-only" id="result-label">추첨 결과</h2>
 
-      <div class="trough" id="trough">
+      <div class="trough" id="trough" aria-busy="false">
         <div class="trough__ring" aria-hidden="true"></div>
         <p class="empty" id="empty">아직 번호가 없습니다. 세트를 고른 뒤 추첨하세요.</p>
         <div class="results" id="results" hidden aria-live="polite"></div>
@@ -654,22 +774,50 @@
         <button type="button" class="btn" id="draw">번호 추첨</button>
       </div>
 
+      <div class="result-actions" id="result-actions" hidden>
+        <button type="button" class="btn-ghost" id="copy-sets">번호 복사</button>
+      </div>
+
       <p class="meta" id="meta" hidden>
         이번 회차 <strong id="drawn-at"></strong>
         · 조합 <strong id="combo-count">0</strong>개
       </p>
-      <p class="meta" id="db-status" hidden></p>
+      <p class="meta" id="db-status" hidden role="status"></p>
+
+      <div class="compare" id="compare" hidden>
+        <h3 class="compare__title">공식 당첨 번호 대조</h3>
+        <p class="compare__hint">당첨 번호 6개와 보너스 1개를 입력하세요. (예: 1 7 12 23 34 45 + 9)</p>
+        <div class="compare__row">
+          <div class="field">
+            <label for="win-nums">당첨 번호</label>
+            <input id="win-nums" type="text" inputmode="numeric" placeholder="1 7 12 23 34 45" autocomplete="off" />
+          </div>
+          <div class="field">
+            <label for="win-bonus">보너스</label>
+            <input id="win-bonus" type="text" inputmode="numeric" placeholder="9" autocomplete="off" style="min-width:72px" />
+          </div>
+          <button type="button" class="btn-ghost" id="compare-btn">대조하기</button>
+        </div>
+        <p class="compare__out" id="compare-out" role="status"></p>
+      </div>
     </section>
 
     <section class="history" id="history-wrap" hidden>
       <div class="history-head">
         <h2>최근 추첨</h2>
+        <div class="history-tools">
+          <div class="seg" role="group" aria-label="기록 범위">
+            <button type="button" id="filter-all" aria-pressed="true">전체</button>
+            <button type="button" id="filter-mine" aria-pressed="false">내 기록</button>
+          </div>
+        </div>
       </div>
+      <p class="history-stats" id="history-stats" hidden></p>
       <div class="history-scroll">
         <ol class="history-list" id="history"></ol>
       </div>
     </section>
-  </div>
+  </main>
 
   <dialog class="history-dialog" id="history-dialog" aria-labelledby="history-dialog-title">
     <div class="history-dialog__bar">
@@ -679,32 +827,21 @@
     <div class="history-dialog__body">
       <ol class="history-list" id="history-all"></ol>
       <button type="button" class="btn-ghost history-dialog__more" id="load-more-history" hidden>더 보기</button>
-      <p class="meta" id="all-db-status" hidden></p>
+      <p class="meta" id="all-db-status" hidden role="status"></p>
     </div>
   </dialog>
 
-  <style>
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-  </style>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.3"></script>
   <script>
     const POOL = 45;
     const PICK = 6;
-    const STAGGER_MS = 70;
+    const STAGGER_MS = 90;
     const SPIN_MS = 480;
     const HISTORY_LIMIT = 40;
     const PAGE_SIZE = 30;
+    const CLIENT_KEY = "lottery_client_id";
+    const OFFLINE_KEY = "lottery_offline_draws";
+    const LAST_SETS_KEY = "lottery_last_sets";
 
     const SUPABASE_URL = "https://uuqpsswvpebtawpcgvaa.supabase.co";
     const SUPABASE_ANON_KEY =
@@ -723,6 +860,7 @@
       comboCount: document.getElementById("combo-count"),
       historyWrap: document.getElementById("history-wrap"),
       history: document.getElementById("history"),
+      historyStats: document.getElementById("history-stats"),
       trough: document.getElementById("trough"),
       dbStatus: document.getElementById("db-status"),
       openAll: document.getElementById("open-all-history"),
@@ -731,12 +869,66 @@
       historyAll: document.getElementById("history-all"),
       loadMore: document.getElementById("load-more-history"),
       allDbStatus: document.getElementById("all-db-status"),
+      resultActions: document.getElementById("result-actions"),
+      copySets: document.getElementById("copy-sets"),
+      winNums: document.getElementById("win-nums"),
+      winBonus: document.getElementById("win-bonus"),
+      compareBtn: document.getElementById("compare-btn"),
+      compareOut: document.getElementById("compare-out"),
+      compare: document.getElementById("compare"),
+      filterAll: document.getElementById("filter-all"),
+      filterMine: document.getElementById("filter-mine"),
     };
 
     let drawing = false;
+    let loadingMore = false;
     let allOffset = 0;
     let allTotal = 0;
+    let mineOnly = false;
+    let lastSets = [];
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function uuid() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function getClientId() {
+      try {
+        let id = localStorage.getItem(CLIENT_KEY);
+        if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
+          id = uuid();
+          localStorage.setItem(CLIENT_KEY, id);
+        }
+        return id;
+      } catch {
+        return uuid();
+      }
+    }
+
+    const clientId = getClientId();
+
+    function readOffline() {
+      try {
+        const raw = localStorage.getItem(OFFLINE_KEY);
+        const rows = raw ? JSON.parse(raw) : [];
+        return Array.isArray(rows) ? rows : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function writeOffline(rows) {
+      try {
+        localStorage.setItem(OFFLINE_KEY, JSON.stringify(rows.slice(0, 80)));
+      } catch {
+        /* ignore quota */
+      }
+    }
 
     function ballRange(n) {
       if (n <= 10) return 1;
@@ -786,29 +978,53 @@
       setStatus(els.dbStatus, message, isError);
     }
 
-    function historyItemHtml(row, { withDate = false } = {}) {
-      const at = new Date(row.created_at);
-      const label = withDate ? formatDateTime(at) : formatTime(at);
-      return `
-        <li>
-          <span class="when">${label}</span>
-          <span class="nums">${row.numbers.map((n) => `<span class="chip">${n}</span>`).join("")}</span>
-        </li>`;
+    function setDrawingLock(on) {
+      drawing = on;
+      els.draw.disabled = on;
+      els.sets.disabled = on;
+      els.trough.classList.toggle("is-drawing", on);
+      els.trough.setAttribute("aria-busy", on ? "true" : "false");
     }
 
-    function makeBall(n, { spinning = false, delay = 0 } = {}) {
+    function makeChip(n) {
+      const el = document.createElement("span");
+      el.className = `chip ball--r${ballRange(n)}`;
+      el.textContent = String(n);
+      return el;
+    }
+
+    function appendHistoryItem(listEl, row, { withDate = false } = {}) {
+      const li = document.createElement("li");
+      const when = document.createElement("span");
+      when.className = "when";
+      const at = new Date(row.created_at);
+      when.textContent = withDate ? formatDateTime(at) : formatTime(at);
+
+      const nums = document.createElement("span");
+      nums.className = "nums";
+      const numbers = Array.isArray(row.numbers) ? row.numbers : [];
+      numbers.forEach((n) => nums.appendChild(makeChip(Number(n))));
+
+      li.appendChild(when);
+      li.appendChild(nums);
+      listEl.appendChild(li);
+    }
+
+    function makeBall(n, { spinning = false } = {}) {
       const el = document.createElement("span");
       el.className = `ball ball--r${ballRange(n)}${spinning ? " is-spinning" : ""}`;
-      el.innerHTML = `<span class="ball__n">${n}</span>`;
-      if (!spinning && !reduceMotion) el.style.animationDelay = `${delay}ms`;
+      const label = document.createElement("span");
+      label.className = "ball__n";
+      label.textContent = String(n);
+      el.appendChild(label);
       if (spinning) el.classList.add("is-in");
       return el;
     }
 
-    function renderSets(sets, { spinning = false } = {}) {
+    function renderSets(sets, { spinning = false, sequential = false } = {}) {
       els.results.hidden = false;
       els.empty.hidden = true;
-      els.results.innerHTML = "";
+      els.results.replaceChildren();
 
       const showLabel = sets.length > 1;
       const balls = [];
@@ -826,11 +1042,8 @@
 
         const wrap = document.createElement("div");
         wrap.className = "balls";
-        numbers.forEach((n, i) => {
-          const ball = makeBall(n, {
-            spinning,
-            delay: (setIndex * PICK + i) * STAGGER_MS,
-          });
+        numbers.forEach((n) => {
+          const ball = makeBall(n, { spinning });
           wrap.appendChild(ball);
           balls.push(ball);
         });
@@ -839,10 +1052,30 @@
       });
 
       if (!spinning) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => balls.forEach((el) => el.classList.add("is-in")));
-        });
+        if (!sequential || reduceMotion) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => balls.forEach((el) => el.classList.add("is-in")));
+          });
+        } else {
+          balls.forEach((el, i) => {
+            window.setTimeout(() => el.classList.add("is-in"), i * STAGGER_MS);
+          });
+        }
       }
+    }
+
+    function frequencyStats(rows) {
+      const counts = Array.from({ length: POOL + 1 }, () => 0);
+      rows.forEach((row) => {
+        (row.numbers || []).forEach((n) => {
+          const v = Number(n);
+          if (v >= 1 && v <= POOL) counts[v] += 1;
+        });
+      });
+      const ranked = [];
+      for (let n = 1; n <= POOL; n++) if (counts[n] > 0) ranked.push({ n, c: counts[n] });
+      ranked.sort((a, b) => b.c - a.c || a.n - b.n);
+      return ranked.slice(0, 5);
     }
 
     function renderHistory(rows) {
@@ -851,108 +1084,290 @@
         return;
       }
       els.historyWrap.hidden = false;
-      els.history.innerHTML = rows.map((row) => historyItemHtml(row)).join("");
+      els.history.replaceChildren();
+      rows.forEach((row) => appendHistoryItem(els.history, row));
+
+      const top = frequencyStats(rows);
+      if (top.length) {
+        els.historyStats.hidden = false;
+        els.historyStats.textContent =
+          "최근 빈도(재미용): " + top.map((x) => `${x.n}×${x.c}`).join(" · ");
+      } else {
+        els.historyStats.hidden = true;
+      }
     }
 
     async function loadHistory() {
-      const { data, error } = await db
+      let query = db
         .from("lotto_draw")
-        .select("id, numbers, created_at")
+        .select("id, numbers, created_at, client_id")
         .order("created_at", { ascending: false })
         .limit(HISTORY_LIMIT);
 
+      if (mineOnly) query = query.eq("client_id", clientId);
+
+      const { data, error } = await query;
+      const offline = readOffline().filter((r) => !mineOnly || r.client_id === clientId);
+
       if (error) {
-        setDbStatus("기록 불러오기 실패: " + error.message, true);
+        setDbStatus("기록 불러오기 실패 — 로컬 임시 기록을 표시합니다: " + error.message, true);
+        const merged = offline
+          .slice()
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+          .slice(0, HISTORY_LIMIT);
+        renderHistory(merged);
         return;
       }
-      setDbStatus("");
-      renderHistory(data || []);
+
+      const remote = data || [];
+      const remoteKeys = new Set(remote.map((r) => `${r.created_at}|${(r.numbers || []).join(",")}`));
+      const extras = offline.filter((r) => !remoteKeys.has(`${r.created_at}|${(r.numbers || []).join(",")}`));
+      const merged = [...extras, ...remote]
+        .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+        .slice(0, HISTORY_LIMIT);
+      renderHistory(merged);
     }
 
-    async function fetchHistoryPage(offset, append) {
-      const { data, error, count } = await db
-        .from("lotto_draw")
-        .select("id, numbers, created_at", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .range(offset, offset + PAGE_SIZE - 1);
+    async function fetchHistoryPage(offset, append, { mine = false } = {}) {
+      if (loadingMore) return;
+      loadingMore = true;
+      els.loadMore.disabled = true;
 
-      if (error) {
-        setStatus(els.allDbStatus, "전체 기록 불러오기 실패: " + error.message, true);
-        return;
+      try {
+        let query = db
+          .from("lotto_draw")
+          .select("id, numbers, created_at, client_id", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .range(offset, offset + PAGE_SIZE - 1);
+
+        if (mine) query = query.eq("client_id", clientId);
+
+        const { data, error, count } = await query;
+
+        if (error) {
+          setStatus(els.allDbStatus, "전체 기록 불러오기 실패: " + error.message, true);
+          return;
+        }
+
+        setStatus(els.allDbStatus, "");
+        allTotal = count ?? allTotal;
+        const rows = data || [];
+
+        if (!append) els.historyAll.replaceChildren();
+        if (!append && rows.length === 0) {
+          const li = document.createElement("li");
+          const when = document.createElement("span");
+          when.className = "when";
+          when.textContent = "기록 없음";
+          li.appendChild(when);
+          els.historyAll.appendChild(li);
+        } else {
+          rows.forEach((row) => appendHistoryItem(els.historyAll, row, { withDate: true }));
+        }
+
+        allOffset = offset + rows.length;
+        els.loadMore.hidden = allOffset >= allTotal || rows.length === 0;
+      } finally {
+        loadingMore = false;
+        els.loadMore.disabled = false;
       }
-
-      setStatus(els.allDbStatus, "");
-      allTotal = count ?? allTotal;
-      const rows = data || [];
-      const html = rows.map((row) => historyItemHtml(row, { withDate: true })).join("");
-
-      if (append) els.historyAll.insertAdjacentHTML("beforeend", html);
-      else els.historyAll.innerHTML = html || "<li><span class=\"when\">기록 없음</span></li>";
-
-      allOffset = offset + rows.length;
-      els.loadMore.hidden = allOffset >= allTotal || rows.length === 0;
     }
 
     async function openAllHistory() {
       allOffset = 0;
       allTotal = 0;
-      els.historyAll.innerHTML = "";
+      els.historyAll.replaceChildren();
       els.loadMore.hidden = true;
       els.dialog.showModal();
-      await fetchHistoryPage(0, false);
+      await fetchHistoryPage(0, false, { mine: false });
+    }
+
+    function stashOffline(sets, createdAt) {
+      const rows = readOffline();
+      sets.forEach((numbers) => {
+        rows.unshift({
+          numbers,
+          created_at: createdAt,
+          client_id: clientId,
+          offline: true,
+        });
+      });
+      writeOffline(rows);
+    }
+
+    async function flushOffline() {
+      const rows = readOffline();
+      if (!rows.length) return;
+      const remaining = [];
+      for (const row of rows) {
+        const { error } = await db.from("lotto_draw").insert({
+          numbers: row.numbers,
+          client_id: clientId,
+        });
+        if (error) remaining.push(row);
+      }
+      writeOffline(remaining);
     }
 
     async function saveDraws(sets) {
-      const { error } = await db.from("lotto_draw").insert(sets.map((numbers) => ({ numbers })));
+      const payload = sets.map((numbers) => ({ numbers, client_id: clientId }));
+      const { error } = await db.from("lotto_draw").insert(payload);
       if (error) {
-        setDbStatus("저장 실패: " + error.message, true);
+        stashOffline(sets, new Date().toISOString());
+        setDbStatus("서버 저장 실패 — 이 기기에 임시 저장했습니다: " + error.message, true);
         return false;
       }
-      setDbStatus("");
+      setDbStatus("추첨 기록이 저장되었습니다.");
       return true;
+    }
+
+    function setsToText(sets) {
+      return sets
+        .map((nums, i) => (sets.length > 1 ? `세트 ${i + 1}: ` : "") + nums.join(", "))
+        .join("\n");
+    }
+
+    async function copyLastSets() {
+      if (!lastSets.length) return;
+      const text = setsToText(lastSets);
+      try {
+        await navigator.clipboard.writeText(text);
+        setDbStatus("번호를 복사했습니다.");
+      } catch {
+        setDbStatus("복사에 실패했습니다. 직접 선택해 주세요.", true);
+      }
+    }
+
+    function parseWinInput() {
+      const main = (els.winNums.value || "")
+        .split(/[\s,./|]+/)
+        .map((s) => Number(s))
+        .filter((n) => Number.isInteger(n) && n >= 1 && n <= 45);
+      const bonusRaw = Number(String(els.winBonus.value || "").trim());
+      const bonus = Number.isInteger(bonusRaw) && bonusRaw >= 1 && bonusRaw <= 45 ? bonusRaw : null;
+      const uniq = [...new Set(main)];
+      return { main: uniq, bonus };
+    }
+
+    function rankFor(set, winMain, bonus) {
+      const hits = set.filter((n) => winMain.includes(n)).length;
+      const bonusHit = bonus != null && set.includes(bonus);
+      if (hits === 6) return { rank: 1, hits, bonusHit };
+      if (hits === 5 && bonusHit) return { rank: 2, hits, bonusHit };
+      if (hits === 5) return { rank: 3, hits, bonusHit };
+      if (hits === 4) return { rank: 4, hits, bonusHit };
+      if (hits === 3) return { rank: 5, hits, bonusHit };
+      return { rank: null, hits, bonusHit };
+    }
+
+    function runCompare() {
+      const { main, bonus } = parseWinInput();
+      if (main.length !== 6) {
+        els.compareOut.textContent = "당첨 번호 6개를 입력해 주세요.";
+        return;
+      }
+      if ([...new Set(main)].length !== 6) {
+        els.compareOut.textContent = "당첨 번호는 서로 달라야 합니다.";
+        return;
+      }
+      if (!lastSets.length) {
+        els.compareOut.textContent = "먼저 번호를 추첨해 주세요.";
+        return;
+      }
+
+      const lines = lastSets.map((set, i) => {
+        const { rank, hits, bonusHit } = rankFor(set, main, bonus);
+        const prefix = lastSets.length > 1 ? `세트 ${i + 1}: ` : "";
+        if (rank) return `${prefix}${rank}등 (맞춘 ${hits}개${bonusHit && rank === 2 ? ", 보너스" : ""})`;
+        return `${prefix}낙첨 (맞춘 ${hits}개${bonusHit ? ", 보너스" : ""})`;
+      });
+      els.compareOut.textContent = lines.join(" · ");
+
+      document.querySelectorAll(".ball").forEach((ball) => {
+        const n = Number(ball.querySelector(".ball__n")?.textContent);
+        ball.classList.toggle("ball--hit", main.includes(n) || n === bonus);
+      });
     }
 
     async function runDraw() {
       if (drawing) return;
-      drawing = true;
-      els.draw.disabled = true;
-      els.trough.classList.add("is-drawing");
+      setDrawingLock(true);
+      setDbStatus("추첨 중…");
+      els.compareOut.textContent = "";
 
-      const count = Number(els.sets.value) || 1;
-      const sets = Array.from({ length: count }, () => pickNumbers());
+      try {
+        const count = Number(els.sets.value) || 1;
+        const sets = Array.from({ length: count }, () => pickNumbers());
 
-      if (!reduceMotion) {
-        renderSets(
-          [Array.from({ length: PICK }, () => 1 + Math.floor(Math.random() * POOL))],
-          { spinning: true }
-        );
-        await sleep(SPIN_MS);
+        if (!reduceMotion) {
+          renderSets(
+            [Array.from({ length: PICK }, () => 1 + Math.floor(Math.random() * POOL))],
+            { spinning: true }
+          );
+          await sleep(SPIN_MS);
+        }
+
+        renderSets(sets, { sequential: true });
+        lastSets = sets;
+        try {
+          sessionStorage.setItem(LAST_SETS_KEY, JSON.stringify(sets));
+        } catch {
+          /* ignore */
+        }
+
+        const now = new Date();
+        els.meta.hidden = false;
+        els.drawnAt.textContent = formatTime(now);
+        els.comboCount.textContent = String(count);
+        els.resultActions.hidden = false;
+        els.compare.hidden = false;
+
+        const saved = await saveDraws(sets);
+        await loadHistory();
+        if (saved) setDbStatus("추첨 기록이 저장되었습니다.");
+      } catch (err) {
+        setDbStatus("추첨 처리 중 오류: " + (err && err.message ? err.message : String(err)), true);
+      } finally {
+        setDrawingLock(false);
+        els.draw.focus();
       }
+    }
 
-      renderSets(sets);
-
-      const now = new Date();
-      els.meta.hidden = false;
-      els.drawnAt.textContent = formatTime(now);
-      els.comboCount.textContent = String(count);
-
-      await saveDraws(sets);
-      await loadHistory();
-
-      els.trough.classList.remove("is-drawing");
-      drawing = false;
-      els.draw.disabled = false;
-      els.draw.focus();
+    function setMineFilter(next) {
+      mineOnly = next;
+      els.filterAll.setAttribute("aria-pressed", next ? "false" : "true");
+      els.filterMine.setAttribute("aria-pressed", next ? "true" : "false");
+      loadHistory();
     }
 
     els.draw.addEventListener("click", runDraw);
+    els.copySets.addEventListener("click", copyLastSets);
+    els.compareBtn.addEventListener("click", runCompare);
+    els.filterAll.addEventListener("click", () => setMineFilter(false));
+    els.filterMine.addEventListener("click", () => setMineFilter(true));
     els.openAll.addEventListener("click", openAllHistory);
     els.closeAll.addEventListener("click", () => els.dialog.close());
-    els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true));
+    els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true, { mine: false }));
     els.dialog.addEventListener("click", (e) => {
       if (e.target === els.dialog) els.dialog.close();
     });
-    loadHistory();
+
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(LAST_SETS_KEY) || "null");
+      if (Array.isArray(cached) && cached.length) {
+        lastSets = cached;
+        renderSets(lastSets);
+        els.resultActions.hidden = false;
+        els.compare.hidden = false;
+        els.meta.hidden = false;
+        els.comboCount.textContent = String(lastSets.length);
+        els.drawnAt.textContent = "이전";
+      }
+    } catch {
+      /* ignore */
+    }
+
+    flushOffline().finally(() => loadHistory());
   </script>
 </body>
 </html>
