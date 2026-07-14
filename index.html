@@ -14,10 +14,12 @@
       --ink-soft: #6e6e73;
       --ink-faint: #86868b;
       --line: #d2d2d7;
-      --blue: #0066cc;
-      --blue-hover: #004499;
-      --btn: #1d1d1f;
-      --btn-hover: #000000;
+      --apple: #de071c;
+      --apple-hover: #b00516;
+      --apple-soft: rgba(222, 7, 28, 0.1);
+      --leaf: #34c759;
+      --btn: #de071c;
+      --btn-hover: #b00516;
       --btn-ink: #ffffff;
       --ball-1: #f5d76e;
       --ball-2: #5b9bd5;
@@ -44,8 +46,8 @@
       letter-spacing: -0.022em;
       color: var(--ink);
       background:
-        radial-gradient(900px 420px at 50% -80px, rgba(90, 160, 255, 0.12), transparent 60%),
-        radial-gradient(700px 360px at 85% 18%, rgba(255, 180, 120, 0.1), transparent 55%),
+        radial-gradient(900px 420px at 50% -80px, rgba(222, 7, 28, 0.1), transparent 60%),
+        radial-gradient(700px 360px at 85% 18%, rgba(52, 199, 89, 0.1), transparent 55%),
         var(--bg);
       word-break: keep-all;
       overflow-wrap: anywhere;
@@ -81,18 +83,18 @@
       font: inherit;
       font-size: 12px;
       font-weight: 400;
-      color: var(--blue);
+      color: var(--apple);
       cursor: pointer;
     }
 
-    .nav__link:hover { color: var(--blue-hover); text-decoration: underline; }
+    .nav__link:hover { color: var(--apple-hover); text-decoration: underline; }
 
     .nav__link:focus-visible,
     .btn:focus-visible,
     .btn-ghost:focus-visible,
     .btn-icon:focus-visible,
     .field select:focus-visible {
-      outline: 2px solid var(--blue);
+      outline: 2px solid var(--apple);
       outline-offset: 3px;
       border-radius: 4px;
     }
@@ -119,7 +121,7 @@
       height: 220px;
       top: -60px;
       left: calc(50% - 280px);
-      background: radial-gradient(circle, rgba(91, 155, 213, 0.22), transparent 70%);
+      background: radial-gradient(circle, rgba(222, 7, 28, 0.2), transparent 70%);
     }
 
     .hero::after {
@@ -127,7 +129,7 @@
       height: 180px;
       top: 20px;
       right: calc(50% - 260px);
-      background: radial-gradient(circle, rgba(232, 93, 76, 0.16), transparent 70%);
+      background: radial-gradient(circle, rgba(52, 199, 89, 0.18), transparent 70%);
     }
 
     .hero__inner {
@@ -175,7 +177,7 @@
       padding: 48px 40px 40px;
       border-radius: 28px;
       background:
-        radial-gradient(480px 180px at 50% 18%, rgba(245, 215, 110, 0.14), transparent 70%),
+        radial-gradient(480px 180px at 50% 18%, rgba(222, 7, 28, 0.1), transparent 70%),
         linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
       box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.8) inset,
@@ -188,7 +190,7 @@
       inset: auto 10% 42% 10%;
       height: 120px;
       border-radius: 50%;
-      background: radial-gradient(ellipse at center, rgba(0, 102, 204, 0.08), transparent 70%);
+      background: radial-gradient(ellipse at center, var(--apple-soft), transparent 70%);
       pointer-events: none;
       z-index: 0;
     }
@@ -433,7 +435,7 @@
       border-radius: 28px;
       background:
         linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95)),
-        radial-gradient(400px 160px at 100% 0%, rgba(107, 203, 119, 0.1), transparent 60%),
+        radial-gradient(400px 160px at 100% 0%, rgba(52, 199, 89, 0.12), transparent 60%),
         var(--surface);
       border: 1px solid rgba(0, 0, 0, 0.04);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
@@ -784,7 +786,7 @@
       }
       el.hidden = false;
       el.textContent = message;
-      el.style.color = isError ? "#bf4800" : "var(--ink-faint)";
+      el.style.color = isError ? "var(--apple)" : "var(--ink-faint)";
     }
 
     function setDbStatus(message, isError = false) {
