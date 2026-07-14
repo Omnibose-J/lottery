@@ -252,13 +252,31 @@
       color: var(--ink-muted);
     }
 
+    .select-shell {
+      position: relative;
+      display: inline-block;
+    }
+
+    .select-shell::after {
+      content: "";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border-right: 2px solid var(--ink-muted);
+      border-bottom: 2px solid var(--ink-muted);
+      transform: translateY(-65%) rotate(45deg);
+      pointer-events: none;
+    }
+
     .field select {
       height: 48px;
       min-width: 96px;
-      padding: 0 calc(var(--space) * 2);
+      padding: 0 40px 0 calc(var(--space) * 2);
       border: 1px solid var(--line);
       border-radius: var(--radius-ctl);
-      background: var(--surface);
+      background-color: var(--surface);
       color: var(--ink);
       font-family: var(--font-num);
       font-size: 1rem;
@@ -266,11 +284,10 @@
       letter-spacing: -0.02em;
       font-variant-numeric: tabular-nums;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23555555' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 36px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       box-shadow: var(--shadow);
+      cursor: pointer;
     }
 
     .field select:focus-visible,
@@ -416,6 +433,11 @@
         align-items: stretch;
       }
 
+      .select-shell,
+      .field select {
+        width: 100%;
+      }
+
       .btn {
         width: 100%;
       }
@@ -450,12 +472,14 @@
       <div class="controls">
         <div class="field">
           <label for="sets">세트</label>
-          <select id="sets" name="sets">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="5">5</option>
-          </select>
+          <div class="select-shell">
+            <select id="sets" name="sets">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="5">5</option>
+            </select>
+          </div>
         </div>
         <button type="button" class="btn" id="draw">번호 추첨</button>
       </div>
