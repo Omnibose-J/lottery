@@ -3,207 +3,313 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>lottery · 추첨기</title>
+  <meta name="description" content="1부터 45까지 여섯 개 번호를 뽑고, 추첨 기록을 저장하는 lottery" />
+  <title>lottery</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
     :root {
-      --bg: oklch(0.97 0.01 230);
-      --bg-band: oklch(0.93 0.02 230);
-      --ink: oklch(0.22 0.035 250);
-      --ink-muted: oklch(0.5 0.025 250);
-      --surface: oklch(0.99 0.005 230);
-      --line: oklch(0.86 0.02 230);
-      --accent: oklch(0.58 0.19 25);
-      --accent-ink: oklch(0.98 0.01 25);
-      --accent-hover: oklch(0.5 0.18 22);
-      --ball-1: oklch(0.84 0.12 95);
-      --ball-2: oklch(0.72 0.11 245);
-      --ball-3: oklch(0.66 0.17 25);
-      --ball-4: oklch(0.78 0.015 250);
+      --bg: oklch(0.965 0.008 240);
+      --bg-elevated: oklch(0.985 0.004 240);
+      --surface: oklch(0.995 0.002 240);
+      --ink: oklch(0.2 0.03 255);
+      --ink-soft: oklch(0.42 0.02 255);
+      --ink-faint: oklch(0.62 0.015 255);
+      --line: oklch(0.9 0.012 240);
+      --line-strong: oklch(0.82 0.015 240);
+      --accent: oklch(0.55 0.2 28);
+      --accent-soft: oklch(0.55 0.2 28 / 0.1);
+      --accent-ink: oklch(0.99 0.01 28);
+      --accent-hover: oklch(0.48 0.19 25);
+      --ball-1: oklch(0.86 0.11 95);
+      --ball-2: oklch(0.7 0.12 250);
+      --ball-3: oklch(0.64 0.18 28);
+      --ball-4: oklch(0.8 0.012 250);
       --ball-5: oklch(0.72 0.11 155);
-      --radius-ctl: 8px;
-      --radius-chip: 6px;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
       --space: 8px;
+      --control-h: 48px;
       --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
       --ease-move: cubic-bezier(0.77, 0, 0.175, 1);
-      --ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
-      --dur-enter: 420ms;
-      --dur-fast: 180ms;
+      --dur: 400ms;
+      --shadow-sm:
+        0 1px 1px oklch(0.3 0.03 255 / 0.04),
+        0 2px 4px oklch(0.3 0.03 255 / 0.04);
       --shadow:
-        0 1px 1px oklch(0.35 0.03 250 / 0.05),
-        0 3px 6px oklch(0.35 0.03 250 / 0.06),
-        0 10px 24px oklch(0.35 0.03 250 / 0.07);
+        0 1px 1px oklch(0.3 0.03 255 / 0.04),
+        0 4px 10px oklch(0.3 0.03 255 / 0.05),
+        0 16px 32px oklch(0.3 0.03 255 / 0.06);
       --font-display: "Big Shoulders Display", "Arial Narrow", sans-serif;
       --font-body: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
-      --control-h: 48px;
     }
 
     [hidden] { display: none !important; }
-
     *, *::before, *::after { box-sizing: border-box; }
-
     html { height: 100%; }
 
     body {
       margin: 0;
       min-height: 100dvh;
       font-family: var(--font-body);
-      font-weight: 400;
       font-size: 16px;
-      line-height: 1.65;
+      font-weight: 400;
+      line-height: 1.6;
+      letter-spacing: -0.011em;
       color: var(--ink);
-      background-color: var(--bg);
-      background-image:
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent calc(var(--space) * 4 - 1px),
-          oklch(0.9 0.015 230 / 0.55) calc(var(--space) * 4 - 1px),
-          oklch(0.9 0.015 230 / 0.55) calc(var(--space) * 4)
-        );
-      background-size: calc(var(--space) * 4) 100%;
+      background:
+        radial-gradient(1200px 600px at 0% -10%, oklch(0.94 0.02 28 / 0.35), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, oklch(0.94 0.025 250 / 0.4), transparent 50%),
+        var(--bg);
       word-break: keep-all;
       overflow-wrap: anywhere;
       -webkit-font-smoothing: antialiased;
     }
 
-    .shell {
-      min-height: 100dvh;
-      display: grid;
-      grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
-      max-width: 1120px;
+    .app {
+      width: min(1120px, calc(100% - 2rem));
       margin: 0 auto;
-    }
-
-    .rail {
-      padding: calc(var(--space) * 6) calc(var(--space) * 4);
+      padding: calc(var(--space) * 3) 0 calc(var(--space) * 6);
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
+      gap: calc(var(--space) * 3);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
       justify-content: space-between;
-      gap: calc(var(--space) * 5);
-      border-right: 1px solid var(--line);
-      background: var(--surface);
-      animation: enter-rail var(--dur-enter) var(--ease-out) both;
-    }
-
-    .brand {
-      display: flex;
-      flex-direction: column;
       gap: calc(var(--space) * 2);
+      padding: calc(var(--space) * 1.5) calc(var(--space) * 0.5);
+      animation: rise var(--dur) var(--ease-out) both;
     }
 
-    .brand__rule {
-      width: 40px;
-      height: 3px;
-      background: var(--accent);
-      border-radius: 1px;
-      transform-origin: left center;
-      animation: rule-draw 480ms var(--ease-out) 80ms both;
+    .topbar__brand {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--space) * 1.5);
+      min-width: 0;
     }
 
-    .brand__mark {
+    .topbar__mark {
       margin: 0;
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: clamp(3.5rem, 8vw, 5.5rem);
-      line-height: 0.92;
+      font-size: 1.75rem;
+      line-height: 1;
       letter-spacing: -0.03em;
       text-transform: lowercase;
-      color: var(--ink);
+    }
+
+    .topbar__badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 9999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .link-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 650;
+      color: var(--accent);
+      cursor: pointer;
+      transition: color 140ms var(--ease-out);
+    }
+
+    .link-btn:hover { color: var(--accent-hover); }
+    .link-btn:focus-visible,
+    .btn:focus-visible,
+    .btn-ghost:focus-visible,
+    .btn-icon:focus-visible,
+    .field select:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.78fr) minmax(0, 1.45fr);
+      gap: calc(var(--space) * 3);
+      flex: 1;
+      align-items: stretch;
+    }
+
+    .rail {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: calc(var(--space) * 4);
+      padding: calc(var(--space) * 4);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      animation: rise var(--dur) var(--ease-out) 60ms both;
+    }
+
+    .brand__rule {
+      width: 36px;
+      height: 3px;
+      border-radius: 1px;
+      background: var(--accent);
+      transform-origin: left center;
+      animation: rule 520ms var(--ease-out) 120ms both;
+    }
+
+    .brand__title {
+      margin: calc(var(--space) * 2) 0 calc(var(--space) * 1.5);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: clamp(3.25rem, 7vw, 4.75rem);
+      line-height: 0.92;
+      letter-spacing: -0.035em;
+      text-transform: lowercase;
       text-wrap: balance;
-      animation: enter-up var(--dur-enter) var(--ease-out) 120ms both;
     }
 
     .brand__lede {
       margin: 0;
       max-width: 22rem;
-      font-size: 1.05rem;
+      color: var(--ink-soft);
+      font-size: 1rem;
       font-weight: 450;
       line-height: 1.65;
-      color: var(--ink-muted);
       text-wrap: pretty;
-      animation: enter-up var(--dur-enter) var(--ease-out) 180ms both;
     }
 
     .spec {
       display: grid;
-      grid-template-columns: auto 1fr;
-      gap: calc(var(--space) * 1) calc(var(--space) * 2);
+      gap: 0;
       margin: 0;
       padding: 0;
-      font-size: 0.875rem;
-      animation: enter-up var(--dur-enter) var(--ease-out) 240ms both;
+      border-top: 1px solid var(--line);
+    }
+
+    .spec > div {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr;
+      gap: calc(var(--space) * 1.5);
+      padding: calc(var(--space) * 1.5) 0;
+      border-bottom: 1px solid var(--line);
     }
 
     .spec dt {
       margin: 0;
-      color: var(--ink-muted);
+      color: var(--ink-faint);
+      font-size: 0.8125rem;
       font-weight: 500;
     }
 
     .spec dd {
       margin: 0;
+      font-size: 0.9375rem;
       font-weight: 650;
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.02em;
     }
 
     .stage {
-      padding: calc(var(--space) * 5) calc(var(--space) * 4);
       display: flex;
       flex-direction: column;
-      gap: calc(var(--space) * 4);
-      justify-content: center;
+      gap: calc(var(--space) * 3);
+      animation: rise var(--dur) var(--ease-out) 100ms both;
+    }
+
+    .board {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: calc(var(--space) * 3);
+      padding: calc(var(--space) * 4);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
       background:
-        linear-gradient(180deg, var(--bg-band) 0%, var(--bg) 42%);
-      animation: enter-stage var(--dur-enter) var(--ease-out) 100ms both;
+        linear-gradient(180deg, var(--bg-elevated), var(--surface));
+      box-shadow: var(--shadow);
+      min-height: 320px;
+      transition: border-color 200ms var(--ease-out);
+    }
+
+    .board.is-drawing {
+      border-color: oklch(0.72 0.08 28 / 0.55);
+    }
+
+    .board__label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: calc(var(--space) * 2);
+    }
+
+    .board__label span {
+      font-size: 0.75rem;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .board__live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ink-faint);
+    }
+
+    .board__live i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: oklch(0.68 0.15 145);
+      box-shadow: 0 0 0 3px oklch(0.68 0.15 145 / 0.2);
     }
 
     .trough {
-      position: relative;
-      padding: calc(var(--space) * 4) 0 calc(var(--space) * 3);
-      border-top: 2px dashed var(--line);
-      border-bottom: 2px dashed var(--line);
-      min-height: 140px;
+      flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       gap: calc(var(--space) * 2);
-      transition: border-color 200ms var(--ease-out), background-color 200ms var(--ease-out);
+      padding: calc(var(--space) * 2) 0;
+      min-height: 120px;
     }
 
     .trough.is-drawing {
-      border-color: oklch(0.7 0.08 25 / 0.55);
       background: linear-gradient(
         90deg,
-        transparent 0%,
-        oklch(0.58 0.19 25 / 0.06) 50%,
-        transparent 100%
+        transparent,
+        var(--accent-soft),
+        transparent
       );
-      background-size: 200% 100%;
-      animation: trough-shimmer 0.9s linear infinite;
-    }
-
-    .trough__label {
-      position: absolute;
-      top: calc(var(--space) * -1.5);
-      left: 0;
-      padding: 0 calc(var(--space) * 1);
-      background: var(--bg-band);
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--ink-muted);
-      letter-spacing: -0.01em;
+      background-size: 220% 100%;
+      animation: shimmer 1s linear infinite;
+      border-radius: var(--radius-sm);
     }
 
     .empty {
       margin: 0;
-      color: var(--ink-muted);
+      color: var(--ink-soft);
       font-size: 0.95rem;
-      line-height: 1.6;
+      line-height: 1.65;
+      max-width: 28rem;
     }
 
     .results {
@@ -212,16 +318,11 @@
       gap: calc(var(--space) * 2.5);
     }
 
-    .set-row {
-      display: flex;
-      flex-direction: column;
-      gap: calc(var(--space) * 1);
-    }
-
+    .set-row { display: flex; flex-direction: column; gap: calc(var(--space) * 1); }
     .set-label {
       font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--ink-muted);
+      color: var(--ink-faint);
     }
 
     .balls {
@@ -232,28 +333,69 @@
     }
 
     .ball {
-      width: 64px;
-      height: 64px;
+      position: relative;
+      width: 68px;
+      height: 68px;
       border-radius: 50%;
       display: grid;
       place-items: center;
       font-family: var(--font-display);
       font-weight: 800;
-      font-size: 1.5rem;
+      font-size: 1.55rem;
       letter-spacing: -0.03em;
       font-variant-numeric: tabular-nums;
       color: var(--ink);
-      border: 2px solid oklch(0.3 0.04 250 / 0.12);
-      box-shadow: var(--shadow);
+      border: 2px solid oklch(0.3 0.04 250 / 0.1);
+      box-shadow:
+        inset 0 -12px 20px oklch(0.2 0.03 250 / 0.16),
+        inset 0 7px 12px oklch(1 0 0 / 0.38),
+        var(--shadow-sm);
       opacity: 0;
       transform: translateY(10px) scale(0.92);
-      will-change: transform, opacity;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .ball__n { position: relative; z-index: 2; }
+
+    .ball::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background-image:
+        radial-gradient(circle at 32% 28%, oklch(1 0 0 / 0.55), transparent 40%),
+        radial-gradient(circle at 70% 78%, oklch(0.15 0.03 250 / 0.22), transparent 48%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .ball::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0.42;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+      z-index: 1;
     }
 
     .ball.is-in {
       opacity: 1;
       transform: translateY(0) scale(1);
-      animation: pop-in 380ms var(--ease-out) both;
+      animation: pop-in 380ms var(--ease-out);
+      transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+    }
+
+    .ball.is-in:not(.is-spinning):hover {
+      transform: translateY(-7px) scale(1.08);
+      box-shadow:
+        inset 0 -12px 20px oklch(0.2 0.03 250 / 0.16),
+        inset 0 7px 12px oklch(1 0 0 / 0.38),
+        0 4px 8px oklch(0.3 0.03 255 / 0.08),
+        0 16px 28px oklch(0.3 0.03 255 / 0.12);
     }
 
     .ball.is-spinning {
@@ -261,88 +403,9 @@
       animation: tick 0.22s var(--ease-move) infinite alternate;
     }
 
-    @keyframes tick {
-      from { transform: translateY(-2px) rotate(-3deg); }
-      to { transform: translateY(3px) rotate(3deg); }
-    }
-
-    @keyframes pop-in {
-      0% {
-        opacity: 0;
-        transform: translateY(12px) scale(0.9);
-      }
-      70% {
-        opacity: 1;
-        transform: translateY(-3px) scale(1.04);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes enter-up {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes enter-rail {
-      from {
-        opacity: 0;
-        transform: translateX(-16px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes enter-stage {
-      from {
-        opacity: 0;
-        transform: translateX(16px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes rule-draw {
-      from { transform: scaleX(0); opacity: 0; }
-      to { transform: scaleX(1); opacity: 1; }
-    }
-
-    @keyframes trough-shimmer {
-      from { background-position: 100% 0; }
-      to { background-position: -100% 0; }
-    }
-
-    @keyframes fade-in {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes row-in {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     .ball--r1 { background: var(--ball-1); }
-    .ball--r2 { background: var(--ball-2); color: oklch(0.98 0.01 245); border-color: oklch(0.45 0.08 245 / 0.25); }
-    .ball--r3 { background: var(--ball-3); color: oklch(0.98 0.01 25); border-color: oklch(0.45 0.1 25 / 0.25); }
+    .ball--r2 { background: var(--ball-2); color: oklch(0.98 0.01 250); border-color: oklch(0.45 0.08 250 / 0.25); }
+    .ball--r3 { background: var(--ball-3); color: oklch(0.98 0.01 28); border-color: oklch(0.45 0.1 28 / 0.25); }
     .ball--r4 { background: var(--ball-4); }
     .ball--r5 { background: var(--ball-5); color: oklch(0.98 0.01 155); border-color: oklch(0.45 0.08 155 / 0.25); }
 
@@ -351,25 +414,21 @@
       flex-wrap: wrap;
       align-items: end;
       gap: calc(var(--space) * 2);
-      animation: enter-up var(--dur-enter) var(--ease-out) 220ms both;
     }
 
     .field {
       display: flex;
       flex-direction: column;
-      gap: calc(var(--space) * 0.75);
+      gap: 6px;
     }
 
     .field label {
       font-size: 0.8125rem;
       font-weight: 500;
-      color: var(--ink-muted);
+      color: var(--ink-faint);
     }
 
-    .select-shell {
-      position: relative;
-      display: inline-block;
-    }
+    .select-shell { position: relative; display: inline-block; }
 
     .select-shell::after {
       content: "";
@@ -378,19 +437,19 @@
       top: 50%;
       width: 7px;
       height: 7px;
-      border-right: 2px solid var(--ink-muted);
-      border-bottom: 2px solid var(--ink-muted);
+      border-right: 2px solid var(--ink-soft);
+      border-bottom: 2px solid var(--ink-soft);
       transform: translateY(-65%) rotate(45deg);
       pointer-events: none;
     }
 
     .field select {
       height: var(--control-h);
-      min-width: 88px;
-      padding: 0 40px 0 calc(var(--space) * 2);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-ctl);
-      background-color: var(--surface);
+      min-width: 96px;
+      padding: 0 40px 0 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
       color: var(--ink);
       font-family: var(--font-body);
       font-size: 1rem;
@@ -399,19 +458,13 @@
       font-variant-numeric: tabular-nums;
       appearance: none;
       -webkit-appearance: none;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
-    }
-
-    .field select:focus-visible,
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
     }
 
     .btn {
       height: var(--control-h);
-      padding: 0 calc(var(--space) * 3.5);
+      padding: 0 28px;
       border: none;
       border-radius: 9999px;
       background: var(--accent);
@@ -421,21 +474,26 @@
       font-size: 0.9375rem;
       letter-spacing: -0.02em;
       cursor: pointer;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-sm);
       transition: background-color 140ms var(--ease-out);
     }
 
     .btn:hover { background: var(--accent-hover); }
     .btn:disabled { cursor: wait; opacity: 0.72; }
 
-    .meta {
+    .meta-row {
       display: flex;
       flex-wrap: wrap;
-      gap: calc(var(--space) * 1) calc(var(--space) * 2);
+      align-items: center;
+      justify-content: space-between;
+      gap: calc(var(--space) * 1.5);
+    }
+
+    .meta {
       margin: 0;
       font-size: 0.875rem;
-      color: var(--ink-muted);
-      animation: fade-in var(--dur-fast) var(--ease-out) both;
+      color: var(--ink-soft);
+      animation: fade 180ms var(--ease-out) both;
     }
 
     .meta strong {
@@ -446,15 +504,28 @@
     }
 
     .history {
-      margin-top: auto;
-      animation: enter-up 320ms var(--ease-out) both;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: calc(var(--space) * 3);
+      box-shadow: var(--shadow-sm);
+      animation: rise var(--dur) var(--ease-out) 140ms both;
+    }
+
+    .history-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: calc(var(--space) * 2);
+      margin-bottom: calc(var(--space) * 1.5);
     }
 
     .history h2 {
-      margin: 0 0 calc(var(--space) * 1.5);
+      margin: 0;
       font-size: 0.8125rem;
-      font-weight: 500;
-      color: var(--ink-muted);
+      font-weight: 650;
+      color: var(--ink-faint);
+      letter-spacing: 0.02em;
     }
 
     .history-list {
@@ -470,9 +541,9 @@
       gap: calc(var(--space) * 1.5);
       align-items: center;
       padding: calc(var(--space) * 1.5) 0;
-      border-bottom: 1px solid oklch(0.9 0.015 230);
+      border-bottom: 1px solid var(--line);
       font-variant-numeric: tabular-nums;
-      animation: row-in 280ms var(--ease-out) both;
+      animation: row 280ms var(--ease-out) both;
     }
 
     .history-list li:nth-child(1) { animation-delay: 0ms; }
@@ -482,7 +553,7 @@
 
     .history-list .when {
       font-size: 0.8125rem;
-      color: var(--ink-muted);
+      color: var(--ink-faint);
       font-weight: 500;
     }
 
@@ -498,12 +569,100 @@
       min-width: 28px;
       height: 28px;
       padding: 0 6px;
-      border-radius: var(--radius-chip);
-      background: var(--bg-band);
+      border-radius: var(--radius-xs);
+      background: var(--bg);
+      border: 1px solid var(--line);
       font-family: var(--font-display);
       font-size: 0.95rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+    }
+
+    .history-dialog {
+      width: min(560px, calc(100vw - 2rem));
+      max-height: min(80dvh, 720px);
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .history-dialog::backdrop {
+      background: oklch(0.2 0.03 255 / 0.42);
+    }
+
+    .history-dialog[open] {
+      animation: rise 280ms var(--ease-out);
+    }
+
+    .history-dialog__bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: calc(var(--space) * 2);
+      padding: calc(var(--space) * 2.5) calc(var(--space) * 3);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .history-dialog__bar h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .history-dialog__body {
+      padding: 0 calc(var(--space) * 3) calc(var(--space) * 3);
+      overflow: auto;
+      max-height: calc(min(80dvh, 720px) - 64px);
+    }
+
+    .history-dialog .history-list li {
+      grid-template-columns: 7.5rem 1fr;
+    }
+
+    .history-dialog__more {
+      margin-top: calc(var(--space) * 2);
+      width: 100%;
+    }
+
+    .btn-ghost {
+      height: 40px;
+      padding: 0 20px;
+      border: 1px solid var(--line-strong);
+      border-radius: 9999px;
+      background: var(--surface);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-weight: 650;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 140ms var(--ease-out), border-color 140ms var(--ease-out);
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg);
+      border-color: oklch(0.75 0.02 240);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--ink-soft);
+      font-size: 1.25rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background-color 140ms var(--ease-out), color 140ms var(--ease-out);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg);
+      color: var(--ink);
     }
 
     .sr-only {
@@ -518,125 +677,155 @@
       border: 0;
     }
 
-    @media (max-width: 800px) {
-      .shell {
-        grid-template-columns: 1fr;
-      }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      .rail {
-        border-right: none;
-        border-bottom: 1px solid var(--line);
-        padding: calc(var(--space) * 4) calc(var(--space) * 3);
-        gap: calc(var(--space) * 3);
-      }
+    @keyframes rule {
+      from { transform: scaleX(0); opacity: 0; }
+      to { transform: scaleX(1); opacity: 1; }
+    }
 
-      .brand__mark {
-        font-size: clamp(3.25rem, 16vw, 4.5rem);
-      }
+    @keyframes fade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
-      .stage {
-        padding: calc(var(--space) * 4) calc(var(--space) * 3) calc(var(--space) * 6);
-      }
+    @keyframes row {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      .ball {
-        width: 52px;
-        height: 52px;
-        font-size: 1.25rem;
-      }
+    @keyframes pop-in {
+      0% { opacity: 0; transform: translateY(12px) scale(0.9); }
+      70% { opacity: 1; transform: translateY(-3px) scale(1.04); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-      .controls {
-        flex-direction: column;
-        align-items: stretch;
-      }
+    @keyframes tick {
+      from { transform: translateY(-2px) rotate(-3deg); }
+      to { transform: translateY(3px) rotate(3deg); }
+    }
 
-      .select-shell,
-      .field select,
-      .btn {
-        width: 100%;
-      }
+    @keyframes shimmer {
+      from { background-position: 100% 0; }
+      to { background-position: -100% 0; }
+    }
+
+    @media (max-width: 860px) {
+      .app { width: min(100% - 1.5rem, 720px); padding-top: calc(var(--space) * 2); }
+      .layout { grid-template-columns: 1fr; }
+      .rail { order: 1; }
+      .stage { order: 0; }
+      .brand__title { font-size: clamp(2.75rem, 14vw, 3.75rem); }
+      .ball { width: 56px; height: 56px; font-size: 1.3rem; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .select-shell, .field select, .btn { width: 100%; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .rail,
-      .brand__rule,
-      .brand__mark,
-      .brand__lede,
-      .spec,
-      .stage,
-      .controls,
-      .meta,
-      .history,
-      .history-list li,
-      .ball.is-in {
-        animation: fade-in 160ms linear both;
+      .topbar, .rail, .stage, .history, .brand__rule,
+      .history-dialog[open], .meta, .history-list li, .ball.is-in {
+        animation: fade 160ms linear both;
         transform: none;
       }
-
-      .ball.is-spinning,
-      .trough.is-drawing {
-        animation: none;
-      }
-
-      .trough.is-drawing {
-        background: oklch(0.58 0.19 25 / 0.05);
-      }
+      .ball.is-spinning, .trough.is-drawing { animation: none; }
+      .ball.is-in:not(.is-spinning):hover { transform: none; }
+      .trough.is-drawing { background: var(--accent-soft); }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <aside class="rail">
-      <header class="brand">
-        <div class="brand__rule" aria-hidden="true"></div>
-        <h1 class="brand__mark">lottery</h1>
-        <p class="brand__lede">1부터 45까지, 여섯 개. 버튼을 누르면 바로 뽑습니다.</p>
-      </header>
-
-      <dl class="spec">
-        <dt>범위</dt>
-        <dd>1 ~ 45</dd>
-        <dt>개수</dt>
-        <dd>6</dd>
-        <dt>방식</dt>
-        <dd>무작위</dd>
-      </dl>
-    </aside>
-
-    <main class="stage">
-      <section class="trough" aria-labelledby="result-label">
-        <span class="trough__label" id="result-label">추첨 결과</span>
-
-        <p class="empty" id="empty">아직 번호가 없습니다. 아래에서 세트를 고른 뒤 추첨하세요.</p>
-        <div class="results" id="results" hidden aria-live="polite"></div>
-      </section>
-
-      <div class="controls">
-        <div class="field">
-          <label for="sets">세트</label>
-          <div class="select-shell">
-            <select id="sets" name="sets">
-              <option value="1" selected>1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-        </div>
-        <button type="button" class="btn" id="draw">번호 추첨</button>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar__brand">
+        <p class="topbar__mark">lottery</p>
+        <span class="topbar__badge">6 / 45</span>
       </div>
+      <button type="button" class="link-btn" id="open-all-history">전체기록 보기</button>
+    </header>
 
-      <p class="meta" id="meta" hidden>
-        이번 회차 <strong id="drawn-at"></strong>
-        · 조합 <strong id="combo-count">0</strong>개
-      </p>
+    <div class="layout">
+      <aside class="rail">
+        <div>
+          <div class="brand__rule" aria-hidden="true"></div>
+          <h1 class="brand__title">lottery</h1>
+          <p class="brand__lede">1부터 45까지, 여섯 개. 버튼을 누르면 바로 뽑고 기록이 저장됩니다.</p>
+        </div>
+        <dl class="spec">
+          <div>
+            <dt>범위</dt>
+            <dd>1 ~ 45</dd>
+          </div>
+          <div>
+            <dt>개수</dt>
+            <dd>6</dd>
+          </div>
+          <div>
+            <dt>저장</dt>
+            <dd>lotto_draw</dd>
+          </div>
+        </dl>
+      </aside>
 
-      <section class="history" id="history-wrap" hidden>
-        <h2>최근 추첨</h2>
-        <ol class="history-list" id="history"></ol>
-        <p class="meta" id="db-status" hidden></p>
-      </section>
-    </main>
+      <main class="stage">
+        <section class="board" id="board" aria-labelledby="result-label">
+          <div class="board__label">
+            <span id="result-label">추첨 결과</span>
+            <span class="board__live"><i aria-hidden="true"></i>기록 동기화</span>
+          </div>
+
+          <div class="trough" id="trough">
+            <p class="empty" id="empty">아직 번호가 없습니다. 세트를 고른 뒤 추첨하세요.</p>
+            <div class="results" id="results" hidden aria-live="polite"></div>
+          </div>
+
+          <div class="controls">
+            <div class="field">
+              <label for="sets">세트</label>
+              <div class="select-shell">
+                <select id="sets" name="sets">
+                  <option value="1" selected>1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn" id="draw">번호 추첨</button>
+          </div>
+
+          <div class="meta-row">
+            <p class="meta" id="meta" hidden>
+              이번 회차 <strong id="drawn-at"></strong>
+              · 조합 <strong id="combo-count">0</strong>개
+            </p>
+            <p class="meta" id="db-status" hidden></p>
+          </div>
+        </section>
+
+        <section class="history" id="history-wrap" hidden>
+          <div class="history-head">
+            <h2>최근 추첨</h2>
+          </div>
+          <ol class="history-list" id="history"></ol>
+        </section>
+      </main>
+    </div>
   </div>
+
+  <dialog class="history-dialog" id="history-dialog" aria-labelledby="history-dialog-title">
+    <div class="history-dialog__bar">
+      <h2 id="history-dialog-title">전체 추첨 기록</h2>
+      <button type="button" class="btn-icon" id="close-all-history" aria-label="닫기">×</button>
+    </div>
+    <div class="history-dialog__body">
+      <ol class="history-list" id="history-all"></ol>
+      <button type="button" class="btn-ghost history-dialog__more" id="load-more-history" hidden>더 보기</button>
+      <p class="meta" id="all-db-status" hidden></p>
+    </div>
+  </dialog>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -644,9 +833,9 @@
     const PICK = 6;
     const STAGGER_MS = 65;
     const SPIN_MS = 520;
-    const HISTORY_LIMIT = 12;
+    const HISTORY_LIMIT = 8;
+    const PAGE_SIZE = 30;
 
-    // Public anon key + RLS (select/insert on lotto_draw only)
     const SUPABASE_URL = "https://uuqpsswvpebtawpcgvaa.supabase.co";
     const SUPABASE_ANON_KEY =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1cXBzc3d2cGVidGF3cGNndmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMjE5MzMsImV4cCI6MjA5NzU5NzkzM30.sXpeYxjA55mvq4z0jK-Id4HUOY-rz3rR7TP6_XO3I7c";
@@ -664,11 +853,20 @@
       comboCount: document.getElementById("combo-count"),
       historyWrap: document.getElementById("history-wrap"),
       history: document.getElementById("history"),
-      trough: document.querySelector(".trough"),
+      trough: document.getElementById("trough"),
+      board: document.getElementById("board"),
       dbStatus: document.getElementById("db-status"),
+      openAll: document.getElementById("open-all-history"),
+      closeAll: document.getElementById("close-all-history"),
+      dialog: document.getElementById("history-dialog"),
+      historyAll: document.getElementById("history-all"),
+      loadMore: document.getElementById("load-more-history"),
+      allDbStatus: document.getElementById("all-db-status"),
     };
 
     let drawing = false;
+    let allOffset = 0;
+    let allTotal = 0;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function ballRange(n) {
@@ -696,28 +894,44 @@
       return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
+    function formatDateTime(d) {
+      return `${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${formatTime(d)}`;
+    }
+
     function sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    function setDbStatus(message, isError = false) {
+    function setStatus(el, message, isError = false) {
       if (!message) {
-        els.dbStatus.hidden = true;
-        els.dbStatus.textContent = "";
+        el.hidden = true;
+        el.textContent = "";
         return;
       }
-      els.dbStatus.hidden = false;
-      els.dbStatus.textContent = message;
-      els.dbStatus.style.color = isError ? "var(--accent)" : "var(--ink-muted)";
+      el.hidden = false;
+      el.textContent = message;
+      el.style.color = isError ? "var(--accent)" : "var(--ink-soft)";
+    }
+
+    function setDbStatus(message, isError = false) {
+      setStatus(els.dbStatus, message, isError);
+    }
+
+    function historyItemHtml(row, { withDate = false } = {}) {
+      const at = new Date(row.created_at);
+      const label = withDate ? formatDateTime(at) : formatTime(at);
+      return `
+        <li>
+          <span class="when">${label}</span>
+          <span class="nums">${row.numbers.map((n) => `<span class="chip">${n}</span>`).join("")}</span>
+        </li>`;
     }
 
     function makeBall(n, { spinning = false, delay = 0 } = {}) {
       const el = document.createElement("span");
       el.className = `ball ball--r${ballRange(n)}${spinning ? " is-spinning" : ""}`;
-      el.textContent = n;
-      if (!spinning && !reduceMotion) {
-        el.style.animationDelay = `${delay}ms`;
-      }
+      el.innerHTML = `<span class="ball__n">${n}</span>`;
+      if (!spinning && !reduceMotion) el.style.animationDelay = `${delay}ms`;
       if (spinning) el.classList.add("is-in");
       return el;
     }
@@ -744,8 +958,10 @@
         const wrap = document.createElement("div");
         wrap.className = "balls";
         numbers.forEach((n, i) => {
-          const delay = (setIndex * PICK + i) * STAGGER_MS;
-          const ball = makeBall(n, { spinning, delay });
+          const ball = makeBall(n, {
+            spinning,
+            delay: (setIndex * PICK + i) * STAGGER_MS,
+          });
           wrap.appendChild(ball);
           balls.push(ball);
         });
@@ -755,9 +971,7 @@
 
       if (!spinning) {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            balls.forEach((el) => el.classList.add("is-in"));
-          });
+          requestAnimationFrame(() => balls.forEach((el) => el.classList.add("is-in")));
         });
       }
     }
@@ -767,23 +981,8 @@
         els.historyWrap.hidden = true;
         return;
       }
-
       els.historyWrap.hidden = false;
-      els.historyWrap.style.animation = "none";
-      void els.historyWrap.offsetWidth;
-      els.historyWrap.style.animation = "";
-
-      els.history.innerHTML = rows
-        .map((row) => {
-          const at = new Date(row.created_at);
-          const nums = row.numbers;
-          return `
-          <li>
-            <span class="when">${formatTime(at)}</span>
-            <span class="nums">${nums.map((n) => `<span class="chip">${n}</span>`).join("")}</span>
-          </li>`;
-        })
-        .join("");
+      els.history.innerHTML = rows.map((row) => historyItemHtml(row)).join("");
     }
 
     async function loadHistory() {
@@ -797,14 +996,45 @@
         setDbStatus("기록 불러오기 실패: " + error.message, true);
         return;
       }
-
       setDbStatus("");
       renderHistory(data || []);
     }
 
+    async function fetchHistoryPage(offset, append) {
+      const { data, error, count } = await db
+        .from("lotto_draw")
+        .select("id, numbers, created_at", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(offset, offset + PAGE_SIZE - 1);
+
+      if (error) {
+        setStatus(els.allDbStatus, "전체 기록 불러오기 실패: " + error.message, true);
+        return;
+      }
+
+      setStatus(els.allDbStatus, "");
+      allTotal = count ?? allTotal;
+      const rows = data || [];
+      const html = rows.map((row) => historyItemHtml(row, { withDate: true })).join("");
+
+      if (append) els.historyAll.insertAdjacentHTML("beforeend", html);
+      else els.historyAll.innerHTML = html || "<li><span class=\"when\">기록 없음</span></li>";
+
+      allOffset = offset + rows.length;
+      els.loadMore.hidden = allOffset >= allTotal || rows.length === 0;
+    }
+
+    async function openAllHistory() {
+      allOffset = 0;
+      allTotal = 0;
+      els.historyAll.innerHTML = "";
+      els.loadMore.hidden = true;
+      els.dialog.showModal();
+      await fetchHistoryPage(0, false);
+    }
+
     async function saveDraws(sets) {
-      const payload = sets.map((numbers) => ({ numbers }));
-      const { error } = await db.from("lotto_draw").insert(payload);
+      const { error } = await db.from("lotto_draw").insert(sets.map((numbers) => ({ numbers })));
       if (error) {
         setDbStatus("저장 실패: " + error.message, true);
         return false;
@@ -818,6 +1048,7 @@
       drawing = true;
       els.draw.disabled = true;
       els.trough.classList.add("is-drawing");
+      els.board.classList.add("is-drawing");
 
       const count = Number(els.sets.value) || 1;
       const sets = Array.from({ length: count }, () => pickNumbers());
@@ -844,12 +1075,19 @@
       await loadHistory();
 
       els.trough.classList.remove("is-drawing");
+      els.board.classList.remove("is-drawing");
       drawing = false;
       els.draw.disabled = false;
       els.draw.focus();
     }
 
     els.draw.addEventListener("click", runDraw);
+    els.openAll.addEventListener("click", openAllHistory);
+    els.closeAll.addEventListener("click", () => els.dialog.close());
+    els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true));
+    els.dialog.addEventListener("click", (e) => {
+      if (e.target === els.dialog) els.dialog.close();
+    });
     loadHistory();
   </script>
 </body>
