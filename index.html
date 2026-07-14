@@ -499,13 +499,20 @@
 
     .history-dialog {
       width: min(520px, calc(100vw - 2rem));
-      max-height: min(76dvh, 680px);
+      max-height: min(80dvh, 640px);
+      margin: auto;
       padding: 0;
       border: none;
       border-radius: 18px;
       background: var(--surface);
       color: var(--ink);
       box-shadow: 0 22px 70px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .history-dialog[open] {
+      display: flex;
+      flex-direction: column;
     }
 
     .history-dialog::backdrop {
@@ -513,6 +520,7 @@
     }
 
     .history-dialog__bar {
+      flex: 0 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -528,9 +536,12 @@
     }
 
     .history-dialog__body {
-      padding: 0 20px 20px;
-      overflow: auto;
-      max-height: calc(min(76dvh, 680px) - 64px);
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 4px 20px 20px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .history-dialog .history-list li {
