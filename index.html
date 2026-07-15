@@ -534,8 +534,9 @@
     .compare__out {
       margin: 12px 0 0;
       text-align: center;
-      font-size: 14px;
-      color: var(--ink-soft);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
       min-height: 1.4em;
     }
 
@@ -849,7 +850,7 @@
 
       <div class="compare" id="compare" hidden>
         <h3 class="compare__title">공식 당첨 번호 대조</h3>
-        <p class="compare__hint" id="compare-hint">최신 회차 당첨번호를 자동으로 불러옵니다. 필요하면 직접 수정할 수 있습니다.</p>
+        <p class="compare__hint" id="compare-hint">최신 회차 당첨번호를 불러와 등수를 자동 계산합니다.</p>
         <div class="compare__row">
           <div class="field">
             <label for="win-nums">당첨 번호</label>
@@ -860,7 +861,7 @@
             <input id="win-bonus" type="text" inputmode="numeric" placeholder="—" autocomplete="off" />
           </div>
           <button type="button" class="btn-ghost" id="fetch-win" hidden>다시 불러오기</button>
-          <button type="button" class="btn-ghost" id="compare-btn">대조하기</button>
+          <button type="button" class="btn-ghost" id="compare-btn">다시 계산</button>
         </div>
         <p class="compare__out" id="compare-out" role="status"></p>
       </div>
@@ -1393,14 +1394,18 @@
       els.winNums.value = data.numbers.join(" ");
       els.winBonus.value = String(data.bonus);
       els.compareHint.textContent =
-        `${data.round}회 (${formatOfficialDate(data.date)}) 당첨번호를 불러왔습니다. 필요하면 수정 후 대조하세요.`;
+        `${data.round}회 (${formatOfficialDate(data.date)}) 당첨번호 · 등수는 자동 계산됩니다.`;
       els.fetchWin.hidden = false;
       officialLoaded = true;
+      runCompare({ auto: true });
     }
 
     async function fetchOfficialWin({ force = false } = {}) {
       if (loadingOfficial) return null;
-      if (officialLoaded && !force && els.winNums.value.trim()) return null;
+      if (officialLoaded && !force && els.winNums.value.trim()) {
+        runCompare({ auto: true });
+        return null;
+      }
       loadingOfficial = true;
       els.fetchWin.disabled = true;
       els.compareHint.textContent = "최신 당첨번호를 불러오는 중…";
@@ -1455,6 +1460,7 @@
     async function showComparePanel() {
       els.compare.hidden = false;
       await fetchOfficialWin({ force: false });
+      runCompare({ auto: true });
     }
 
     function parseWinInput() {
@@ -1479,10 +1485,21 @@
       return { rank: null, hits, bonusHit };
     }
 
-    function runCompare() {
+    function formatRankLine(set, i, total, winMain, bonus) {
+      const { rank, hits, bonusHit } = rankFor(set, winMain, bonus);
+      const prefix = total > 1 ? `세트 ${i + 1}: ` : "";
+      if (rank === 1) return `${prefix}1등 (6개 일치)`;
+      if (rank === 2) return `${prefix}2등 (5개 + 보너스)`;
+      if (rank === 3) return `${prefix}3등 (5개 일치)`;
+      if (rank === 4) return `${prefix}4등 (4개 일치)`;
+      if (rank === 5) return `${prefix}5등 (3개 일치)`;
+      return `${prefix}낙첨 (맞춘 ${hits}개${bonusHit ? ", 보너스" : ""})`;
+    }
+
+    function runCompare({ auto = false } = {}) {
       const { main, bonus } = parseWinInput();
       if (main.length !== 6) {
-        els.compareOut.textContent = "당첨 번호 6개를 입력해 주세요.";
+        if (!auto) els.compareOut.textContent = "당첨 번호 6개를 입력해 주세요.";
         return;
       }
       if ([...new Set(main)].length !== 6) {
@@ -1490,19 +1507,16 @@
         return;
       }
       if (!lastSets.length) {
-        els.compareOut.textContent = "먼저 번호를 추첨해 주세요.";
+        if (!auto) els.compareOut.textContent = "먼저 번호를 추첨해 주세요.";
         return;
       }
 
-      const lines = lastSets.map((set, i) => {
-        const { rank, hits, bonusHit } = rankFor(set, main, bonus);
-        const prefix = lastSets.length > 1 ? `세트 ${i + 1}: ` : "";
-        if (rank) return `${prefix}${rank}등 (맞춘 ${hits}개${bonusHit && rank === 2 ? ", 보너스" : ""})`;
-        return `${prefix}낙첨 (맞춘 ${hits}개${bonusHit ? ", 보너스" : ""})`;
-      });
+      const lines = lastSets.map((set, i) =>
+        formatRankLine(set, i, lastSets.length, main, bonus)
+      );
       els.compareOut.textContent = lines.join(" · ");
 
-      document.querySelectorAll(".ball").forEach((ball) => {
+      document.querySelectorAll("#results .ball").forEach((ball) => {
         const n = Number(ball.querySelector(".ball__n")?.textContent);
         ball.classList.toggle("ball--hit", main.includes(n) || n === bonus);
       });
@@ -1514,6 +1528,7 @@
         set_count: lastSets.length,
         best_rank: best && best.rank ? best.rank : 0,
         best_hits: best ? best.hits : 0,
+        auto: auto ? 1 : 0,
       });
     }
 
@@ -1584,8 +1599,15 @@
       copyLastSets();
       trackEvent("lotto_copy", { set_count: lastSets.length });
     });
-    els.compareBtn.addEventListener("click", runCompare);
+    els.compareBtn.addEventListener("click", () => runCompare({ auto: false }));
     els.fetchWin.addEventListener("click", () => fetchOfficialWin({ force: true }));
+    let compareTimer = 0;
+    const scheduleCompare = () => {
+      window.clearTimeout(compareTimer);
+      compareTimer = window.setTimeout(() => runCompare({ auto: true }), 250);
+    };
+    els.winNums.addEventListener("input", scheduleCompare);
+    els.winBonus.addEventListener("input", scheduleCompare);
     els.filterAll.addEventListener("click", () => setMineFilter(false));
     els.filterMine.addEventListener("click", () => setMineFilter(true));
     els.openAll.addEventListener("click", openAllHistory);
