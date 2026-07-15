@@ -1247,21 +1247,17 @@
       renderHistory(merged);
     }
 
-    async function fetchHistoryPage(offset, append, { mine = false } = {}) {
+    async function fetchHistoryPage(offset, append) {
       if (loadingMore) return;
       loadingMore = true;
       els.loadMore.disabled = true;
 
       try {
-        let query = db
+        const { data, error, count } = await db
           .from("lotto_draw")
           .select("id, numbers, created_at", { count: "exact" })
           .order("created_at", { ascending: false })
           .range(offset, offset + PAGE_SIZE - 1);
-
-        if (mine) query = query.eq("client_id", clientId);
-
-        const { data, error, count } = await query;
 
         if (error) {
           setStatus(els.allDbStatus, "전체 기록 불러오기 실패: " + error.message, true);
@@ -1298,7 +1294,7 @@
       els.historyAll.replaceChildren();
       els.loadMore.hidden = true;
       els.dialog.showModal();
-      await fetchHistoryPage(0, false, { mine: false });
+      await fetchHistoryPage(0, false);
     }
 
     function stashOffline(sets, createdAt) {
@@ -1594,7 +1590,7 @@
     els.filterMine.addEventListener("click", () => setMineFilter(true));
     els.openAll.addEventListener("click", openAllHistory);
     els.closeAll.addEventListener("click", () => els.dialog.close());
-    els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true, { mine: false }));
+    els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true));
     els.dialog.addEventListener("click", (e) => {
       if (e.target === els.dialog) els.dialog.close();
     });

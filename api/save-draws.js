@@ -84,7 +84,7 @@ module.exports = async function handler(req, res) {
         apikey: serviceKey,
         Authorization: `Bearer ${serviceKey}`,
         "Content-Type": "application/json",
-        Prefer: "return=representation",
+        Prefer: "return=minimal",
       },
       body: JSON.stringify(rows),
     });
@@ -107,7 +107,7 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    res.status(200).json({ ok: true, rows: payload || [] });
+    res.status(200).json({ ok: true, saved: rows.length });
   } catch (err) {
     res.status(502).json({
       error: "upstream failed",
