@@ -803,16 +803,17 @@
 
       <div class="compare" id="compare" hidden>
         <h3 class="compare__title">공식 당첨 번호 대조</h3>
-        <p class="compare__hint">당첨 번호 6개와 보너스 1개를 입력하세요. (예: 1 7 12 23 34 45 + 9)</p>
+        <p class="compare__hint" id="compare-hint">최신 회차 당첨번호를 자동으로 불러옵니다. 필요하면 직접 수정할 수 있습니다.</p>
         <div class="compare__row">
           <div class="field">
             <label for="win-nums">당첨 번호</label>
-            <input id="win-nums" type="text" inputmode="numeric" placeholder="1 7 12 23 34 45" autocomplete="off" />
+            <input id="win-nums" type="text" inputmode="numeric" placeholder="불러오는 중…" autocomplete="off" />
           </div>
           <div class="field">
             <label for="win-bonus">보너스</label>
-            <input id="win-bonus" type="text" inputmode="numeric" placeholder="9" autocomplete="off" style="min-width:72px" />
+            <input id="win-bonus" type="text" inputmode="numeric" placeholder="—" autocomplete="off" style="min-width:72px" />
           </div>
+          <button type="button" class="btn-ghost" id="fetch-win" hidden>다시 불러오기</button>
           <button type="button" class="btn-ghost" id="compare-btn">대조하기</button>
         </div>
         <p class="compare__out" id="compare-out" role="status"></p>
@@ -893,7 +894,9 @@
       winNums: document.getElementById("win-nums"),
       winBonus: document.getElementById("win-bonus"),
       compareBtn: document.getElementById("compare-btn"),
+      fetchWin: document.getElementById("fetch-win"),
       compareOut: document.getElementById("compare-out"),
+      compareHint: document.getElementById("compare-hint"),
       compare: document.getElementById("compare"),
       filterAll: document.getElementById("filter-all"),
       filterMine: document.getElementById("filter-mine"),
@@ -901,11 +904,21 @@
 
     let drawing = false;
     let loadingMore = false;
+    let loadingOfficial = false;
+    let officialLoaded = false;
     let allOffset = 0;
     let allTotal = 0;
     let mineOnly = false;
     let lastSets = [];
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function trackEvent(name, params = {}) {
+      try {
+        if (typeof gtag === "function") gtag("event", name, params);
+      } catch {
+        /* ignore analytics errors */
+      }
+    }
 
     function uuid() {
       if (crypto.randomUUID) return crypto.randomUUID();
@@ -1129,7 +1142,7 @@
     async function loadHistory() {
       let query = db
         .from("lotto_draw")
-        .select("id, numbers, created_at, client_id")
+        .select("id, numbers, created_at")
         .order("created_at", { ascending: false })
         .limit(HISTORY_LIMIT);
 
@@ -1165,7 +1178,7 @@
       try {
         let query = db
           .from("lotto_draw")
-          .select("id, numbers, created_at, client_id", { count: "exact" })
+          .select("id, numbers, created_at", { count: "exact" })
           .order("created_at", { ascending: false })
           .range(offset, offset + PAGE_SIZE - 1);
 
@@ -1267,6 +1280,87 @@
       }
     }
 
+    function formatOfficialDate(raw) {
+      if (!raw) return "";
+      const s = String(raw);
+      if (/^\d{8}$/.test(s)) {
+        return `${s.slice(0, 4)}.${s.slice(4, 6)}.${s.slice(6, 8)}`;
+      }
+      const d = new Date(s);
+      if (!Number.isNaN(d.getTime())) {
+        return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
+      }
+      return s;
+    }
+
+    function applyOfficialWin(data) {
+      els.winNums.value = data.numbers.join(" ");
+      els.winBonus.value = String(data.bonus);
+      els.compareHint.textContent =
+        `${data.round}회 (${formatOfficialDate(data.date)}) 당첨번호를 불러왔습니다. 필요하면 수정 후 대조하세요.`;
+      els.fetchWin.hidden = false;
+      officialLoaded = true;
+    }
+
+    async function fetchOfficialWin({ force = false } = {}) {
+      if (loadingOfficial) return null;
+      if (officialLoaded && !force && els.winNums.value.trim()) return null;
+      loadingOfficial = true;
+      els.fetchWin.disabled = true;
+      els.compareHint.textContent = "최신 당첨번호를 불러오는 중…";
+
+      try {
+        let data = null;
+
+        try {
+          const r = await fetch("/api/lotto-latest");
+          if (r.ok) data = await r.json();
+        } catch {
+          /* fall through */
+        }
+
+        if (!data || !Array.isArray(data.numbers)) {
+          const r = await fetch("https://smok95.github.io/lotto/results/latest.json");
+          if (!r.ok) throw new Error("mirror " + r.status);
+          const mirror = await r.json();
+          data = {
+            source: "mirror",
+            round: mirror.draw_no,
+            date: mirror.date,
+            numbers: mirror.numbers,
+            bonus: mirror.bonus_no,
+          };
+        }
+
+        if (!data || !Array.isArray(data.numbers) || data.numbers.length !== 6) {
+          throw new Error("invalid payload");
+        }
+
+        applyOfficialWin(data);
+        trackEvent("lotto_official_fetch", {
+          round: Number(data.round) || 0,
+          source: data.source || "unknown",
+        });
+        return data;
+      } catch (err) {
+        els.compareHint.textContent =
+          "자동 불러오기에 실패했습니다. 당첨번호 6개와 보너스를 직접 입력해 주세요.";
+        els.fetchWin.hidden = false;
+        trackEvent("lotto_official_fetch_fail", {
+          message: err && err.message ? String(err.message).slice(0, 80) : "unknown",
+        });
+        return null;
+      } finally {
+        loadingOfficial = false;
+        els.fetchWin.disabled = false;
+      }
+    }
+
+    async function showComparePanel() {
+      els.compare.hidden = false;
+      await fetchOfficialWin({ force: false });
+    }
+
     function parseWinInput() {
       const main = (els.winNums.value || "")
         .split(/[\s,./|]+/)
@@ -1316,6 +1410,15 @@
         const n = Number(ball.querySelector(".ball__n")?.textContent);
         ball.classList.toggle("ball--hit", main.includes(n) || n === bonus);
       });
+
+      const best = lastSets
+        .map((set) => rankFor(set, main, bonus))
+        .sort((a, b) => (a.rank || 99) - (b.rank || 99))[0];
+      trackEvent("lotto_compare", {
+        set_count: lastSets.length,
+        best_rank: best && best.rank ? best.rank : 0,
+        best_hits: best ? best.hits : 0,
+      });
     }
 
     async function runDraw() {
@@ -1323,6 +1426,9 @@
       setDrawingLock(true);
       setDbStatus("추첨 중…");
       els.compareOut.textContent = "";
+      trackEvent("lotto_draw_click", {
+        set_count: Number(els.sets.value) || 1,
+      });
 
       try {
         const count = Number(els.sets.value) || 1;
@@ -1349,13 +1455,21 @@
         els.drawnAt.textContent = formatTime(now);
         els.comboCount.textContent = String(count);
         els.resultActions.hidden = false;
-        els.compare.hidden = false;
+        await showComparePanel();
 
         const saved = await saveDraws(sets);
         await loadHistory();
         if (saved) setDbStatus("추첨 기록이 저장되었습니다.");
+
+        trackEvent("lotto_draw", {
+          set_count: count,
+          saved: saved ? 1 : 0,
+        });
       } catch (err) {
         setDbStatus("추첨 처리 중 오류: " + (err && err.message ? err.message : String(err)), true);
+        trackEvent("lotto_draw_error", {
+          message: err && err.message ? String(err.message).slice(0, 80) : "unknown",
+        });
       } finally {
         setDrawingLock(false);
         els.draw.focus();
@@ -1370,8 +1484,12 @@
     }
 
     els.draw.addEventListener("click", runDraw);
-    els.copySets.addEventListener("click", copyLastSets);
+    els.copySets.addEventListener("click", () => {
+      copyLastSets();
+      trackEvent("lotto_copy", { set_count: lastSets.length });
+    });
     els.compareBtn.addEventListener("click", runCompare);
+    els.fetchWin.addEventListener("click", () => fetchOfficialWin({ force: true }));
     els.filterAll.addEventListener("click", () => setMineFilter(false));
     els.filterMine.addEventListener("click", () => setMineFilter(true));
     els.openAll.addEventListener("click", openAllHistory);
@@ -1387,10 +1505,10 @@
         lastSets = cached;
         renderSets(lastSets);
         els.resultActions.hidden = false;
-        els.compare.hidden = false;
         els.meta.hidden = false;
         els.comboCount.textContent = String(lastSets.length);
         els.drawnAt.textContent = "이전";
+        showComparePanel();
       }
     } catch {
       /* ignore */
