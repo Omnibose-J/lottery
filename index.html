@@ -5,13 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="1부터 45까지 여섯 개 번호를 뽑고, 추첨 기록을 저장하는 Lottery" />
   <title>Lottery</title>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-BHJCDFF8CY"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-BHJCDFF8CY');
+    window.__enableAnalytics = function enableAnalytics() {
+      if (window.__gaReady) return;
+      window.__gaReady = true;
+      var s = document.createElement("script");
+      s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=G-BHJCDFF8CY";
+      document.head.appendChild(s);
+      gtag("js", new Date());
+      gtag("config", "G-BHJCDFF8CY");
+    };
+    try {
+      if (localStorage.getItem("lottery_consent") === "1") window.__enableAnalytics();
+    } catch (e) { /* ignore */ }
   </script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   <style>
@@ -417,6 +426,43 @@
       cursor: text;
     }
 
+    .field input#win-bonus {
+      min-width: 72px;
+    }
+
+    .consent {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      z-index: 40;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .consent p {
+      margin: 0;
+      flex: 1 1 240px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--ink-soft);
+    }
+
+    .consent__actions {
+      display: flex;
+      gap: 8px;
+    }
+
     .btn {
       height: var(--control-h);
       padding: 0 22px;
@@ -811,7 +857,7 @@
           </div>
           <div class="field">
             <label for="win-bonus">보너스</label>
-            <input id="win-bonus" type="text" inputmode="numeric" placeholder="—" autocomplete="off" style="min-width:72px" />
+            <input id="win-bonus" type="text" inputmode="numeric" placeholder="—" autocomplete="off" />
           </div>
           <button type="button" class="btn-ghost" id="fetch-win" hidden>다시 불러오기</button>
           <button type="button" class="btn-ghost" id="compare-btn">대조하기</button>
@@ -849,6 +895,14 @@
       <p class="meta" id="all-db-status" hidden role="status"></p>
     </div>
   </dialog>
+
+  <div class="consent" id="consent" hidden role="dialog" aria-labelledby="consent-copy">
+    <p id="consent-copy">방문 통계 수집(Google Analytics)에 동의하시면 확인을 눌러 주세요. 거부해도 추첨 기능은 그대로 사용할 수 있습니다.</p>
+    <div class="consent__actions">
+      <button type="button" class="btn-ghost" id="consent-decline">거부</button>
+      <button type="button" class="btn" id="consent-accept">동의</button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.3"></script>
   <script>
@@ -972,8 +1026,10 @@
 
     function pickNumbers() {
       const bag = Array.from({ length: POOL }, (_, i) => i + 1);
+      const rand = new Uint32Array(1);
       for (let i = bag.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
+        crypto.getRandomValues(rand);
+        const j = rand[0] % (i + 1);
         [bag[i], bag[j]] = [bag[j], bag[i]];
       }
       return bag.slice(0, PICK).sort((a, b) => a - b);
@@ -1111,20 +1167,16 @@
     }
 
     function renderHistory(rows) {
+      els.historyWrap.hidden = false;
       if (!rows.length) {
-        if (mineOnly) {
-          els.historyWrap.hidden = false;
-          els.history.replaceChildren();
-          els.historyStats.hidden = true;
-          els.historyEmpty.hidden = false;
-          els.historyEmpty.textContent = "아직 내 추첨 기록이 없습니다.";
-          return;
-        }
-        els.historyWrap.hidden = true;
-        els.historyEmpty.hidden = true;
+        els.history.replaceChildren();
+        els.historyStats.hidden = true;
+        els.historyEmpty.hidden = false;
+        els.historyEmpty.textContent = mineOnly
+          ? "아직 내 추첨 기록이 없습니다."
+          : "아직 추첨 기록이 없습니다.";
         return;
       }
-      els.historyWrap.hidden = false;
       els.historyEmpty.hidden = true;
       els.history.replaceChildren();
       rows.forEach((row) => appendHistoryItem(els.history, row));
@@ -1140,16 +1192,41 @@
     }
 
     async function loadHistory() {
-      let query = db
+      const offline = readOffline().filter((r) => !mineOnly || r.client_id === clientId);
+
+      if (mineOnly) {
+        const { data, error } = await db.rpc("get_my_lotto_draws", {
+          p_client_id: clientId,
+          p_limit: HISTORY_LIMIT,
+          p_offset: 0,
+        });
+
+        if (error) {
+          setDbStatus("기록 불러오기 실패 — 로컬 임시 기록을 표시합니다: " + error.message, true);
+          renderHistory(
+            offline
+              .slice()
+              .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+              .slice(0, HISTORY_LIMIT)
+          );
+          return;
+        }
+
+        const remote = data || [];
+        const remoteKeys = new Set(remote.map((r) => `${r.created_at}|${(r.numbers || []).join(",")}`));
+        const extras = offline.filter((r) => !remoteKeys.has(`${r.created_at}|${(r.numbers || []).join(",")}`));
+        const merged = [...extras, ...remote]
+          .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))
+          .slice(0, HISTORY_LIMIT);
+        renderHistory(merged);
+        return;
+      }
+
+      const { data, error } = await db
         .from("lotto_draw")
         .select("id, numbers, created_at")
         .order("created_at", { ascending: false })
         .limit(HISTORY_LIMIT);
-
-      if (mineOnly) query = query.eq("client_id", clientId);
-
-      const { data, error } = await query;
-      const offline = readOffline().filter((r) => !mineOnly || r.client_id === clientId);
 
       if (error) {
         setDbStatus("기록 불러오기 실패 — 로컬 임시 기록을 표시합니다: " + error.message, true);
@@ -1242,25 +1319,48 @@
       if (!rows.length) return;
       const remaining = [];
       for (const row of rows) {
-        const { error } = await db.from("lotto_draw").insert({
-          numbers: row.numbers,
-          client_id: clientId,
-        });
-        if (error) remaining.push(row);
+        try {
+          const r = await fetch("/api/save-draws", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sets: [row.numbers], client_id: clientId }),
+          });
+          if (!r.ok) remaining.push(row);
+        } catch {
+          remaining.push(row);
+        }
       }
       writeOffline(remaining);
     }
 
     async function saveDraws(sets) {
-      const payload = sets.map((numbers) => ({ numbers, client_id: clientId }));
-      const { error } = await db.from("lotto_draw").insert(payload);
-      if (error) {
+      try {
+        const r = await fetch("/api/save-draws", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sets, client_id: clientId }),
+        });
+        const payload = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          stashOffline(sets, new Date().toISOString());
+          setDbStatus(
+            "서버 저장 실패 — 이 기기에 임시 저장했습니다: " +
+              (payload.error || r.statusText || "error"),
+            true
+          );
+          return false;
+        }
+        setDbStatus("추첨 기록이 저장되었습니다.");
+        return true;
+      } catch (err) {
         stashOffline(sets, new Date().toISOString());
-        setDbStatus("서버 저장 실패 — 이 기기에 임시 저장했습니다: " + error.message, true);
+        setDbStatus(
+          "서버 저장 실패 — 이 기기에 임시 저장했습니다: " +
+            (err && err.message ? err.message : String(err)),
+          true
+        );
         return false;
       }
-      setDbStatus("추첨 기록이 저장되었습니다.");
-      return true;
     }
 
     function setsToText(sets) {
@@ -1497,6 +1597,36 @@
     els.loadMore.addEventListener("click", () => fetchHistoryPage(allOffset, true, { mine: false }));
     els.dialog.addEventListener("click", (e) => {
       if (e.target === els.dialog) els.dialog.close();
+    });
+    els.dialog.addEventListener("close", () => {
+      els.openAll.focus();
+    });
+
+    const consentEl = document.getElementById("consent");
+    const consentAccept = document.getElementById("consent-accept");
+    const consentDecline = document.getElementById("consent-decline");
+    try {
+      if (!localStorage.getItem("lottery_consent")) consentEl.hidden = false;
+    } catch {
+      consentEl.hidden = false;
+    }
+    consentAccept.addEventListener("click", () => {
+      try {
+        localStorage.setItem("lottery_consent", "1");
+      } catch {
+        /* ignore */
+      }
+      if (typeof window.__enableAnalytics === "function") window.__enableAnalytics();
+      consentEl.hidden = true;
+      trackEvent("consent_accept");
+    });
+    consentDecline.addEventListener("click", () => {
+      try {
+        localStorage.setItem("lottery_consent", "0");
+      } catch {
+        /* ignore */
+      }
+      consentEl.hidden = true;
     });
 
     try {
