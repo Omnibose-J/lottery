@@ -553,6 +553,15 @@
       line-height: 1.5;
     }
 
+    .history-empty {
+      margin: 8px 0 0;
+      padding: 20px 0 8px;
+      text-align: center;
+      font-size: 15px;
+      color: var(--ink-faint);
+      line-height: 1.47;
+    }
+
     .history-scroll {
       max-height: 220px;
       overflow-y: auto;
@@ -821,6 +830,7 @@
         </div>
       </div>
       <p class="history-stats" id="history-stats" hidden></p>
+      <p class="history-empty" id="history-empty" hidden>아직 내 추첨 기록이 없습니다.</p>
       <div class="history-scroll">
         <ol class="history-list" id="history"></ol>
       </div>
@@ -869,6 +879,7 @@
       historyWrap: document.getElementById("history-wrap"),
       history: document.getElementById("history"),
       historyStats: document.getElementById("history-stats"),
+      historyEmpty: document.getElementById("history-empty"),
       trough: document.getElementById("trough"),
       dbStatus: document.getElementById("db-status"),
       openAll: document.getElementById("open-all-history"),
@@ -1088,10 +1099,20 @@
 
     function renderHistory(rows) {
       if (!rows.length) {
+        if (mineOnly) {
+          els.historyWrap.hidden = false;
+          els.history.replaceChildren();
+          els.historyStats.hidden = true;
+          els.historyEmpty.hidden = false;
+          els.historyEmpty.textContent = "아직 내 추첨 기록이 없습니다.";
+          return;
+        }
         els.historyWrap.hidden = true;
+        els.historyEmpty.hidden = true;
         return;
       }
       els.historyWrap.hidden = false;
+      els.historyEmpty.hidden = true;
       els.history.replaceChildren();
       rows.forEach((row) => appendHistoryItem(els.history, row));
 
