@@ -1099,7 +1099,7 @@
       if (top.length) {
         els.historyStats.hidden = false;
         els.historyStats.textContent =
-          "최근 빈도(재미용): " + top.map((x) => `${x.n}×${x.c}`).join(" · ");
+          "최근 빈도: " + top.map((x) => `${x.n}×${x.c}`).join(" · ");
       } else {
         els.historyStats.hidden = true;
       }
